@@ -91,6 +91,45 @@ Built specifically for Claude Code's terminal-based interface with seamless MCP 
 └── docs/          # Documentation and references
 ```
 
+### 🧠 Critical Insight: Markdown = Active Configuration
+
+**In Claude Code, Markdown files are NOT just documentation - they are executable agent specifications:**
+
+1. **Agent Definitions as Contracts** (`agents/*.md`)
+   - Every `.md` file in `agents/` is a live subagent definition
+   - YAML frontmatter defines capabilities, hooks, and behaviors
+   - These are directly invokable: `/agent planner` or auto-delegated by Claude
+   - No compilation needed - the runtime interprets Markdown as system prompts
+
+2. **Hierarchical Context Injection** (`CLAUDE.md` files)
+   - Root `CLAUDE.md` → Global project instructions
+   - Directory-level `CLAUDE.md` → Scoped context for subtrees
+   - Claude loads these hierarchically, creating a tiered memory system
+   - Edit these files to tune Claude's behavior without touching code
+
+3. **Hooks as Automation Gates** (`hooks/*.sh`)
+   - Pre-run: Enforce quality checks before execution
+   - Post-run: Capture metrics and generate reviews
+   - Verify gates: Block if quality scores fall below thresholds
+   - These run automatically, creating continuous evaluation
+
+4. **MCP as Execution Layer** (`mcp/servers.json`)
+   - Markdown agents aren't just "pretend" - they call real tools
+   - MCP servers provide access to git, browser, search, and more
+   - The JSON/YAML configs are live wiring diagrams for tool access
+
+5. **Consensus as Plugins** (`agents/consensus/*.md`)
+   - Raft, CRDT, Gossip modules as swappable reasoning strategies
+   - Switch consensus models dynamically: `/raft-manager` vs `/gossip-coordinator`
+   - Each `.md` file contains algorithms and pseudo-code Claude can execute
+
+**This is not a documentation repository - it's a Claude-native multi-agent operating system where:**
+- **Markdown = Subagent contracts**
+- **CLAUDE.md = Memory layers**
+- **Hooks = CI/CD gates**
+- **MCP = Tool execution**
+- **Everything is declarative and hot-swappable**
+
 ## 🔧 Installation & Setup
 
 ### Prerequisites
