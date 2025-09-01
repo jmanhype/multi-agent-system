@@ -132,8 +132,54 @@ claude
 
 ## 🎯 Quick Start with Claude Code
 
+### 🔴 IMPORTANT: System Activation
+
+To activate the multi-agent system in Claude Code, you need to use the **Task tool** to spawn agents:
+
+```markdown
+⏺ In Claude Code, request agent activation:
+"Use the Task tool to spawn test generation agents"
+"Deploy TDD agents via Task tool for the API"
+"Activate hive-mind system using Task tool"
+```
+
+The Task tool is the primary mechanism for agent orchestration in Claude Code. Example workflow:
+
+```markdown
+⏺ Update Todos
+  ⎿  ☒ API development and documentation              
+     ☐ Testing suite with TDD approach
+     ☐ Use Task tool for test generation
+     ☐ Deploy test agents via Task tool
+     ☐ E2E tests via Task tool agents
+```
+
+#### How It Works: One Command, Full Activation
+
+**In a fresh Claude Code instance, a single Task tool command activates the entire system:**
+
+```markdown
+"Use the Task tool to dogfood our multi-agent system by creating a full-stack app"
+```
+
+This single natural language request triggers:
+
+1. **Claude-Flow MCP Server** (priority 1) initialization
+2. **Automatic Agent Spawning** - All 64 specialized agents as needed:
+   - Planner agents for strategy
+   - Researcher agents for best practices
+   - Architect agents for system design
+   - Developer agents for implementation
+   - Tester agents for validation
+   - DevOps agents for CI/CD
+3. **Hook Chain Activation** - All automation hooks fire automatically
+4. **Hive-Mind Coordination** - Queen-led orchestration with worker specialization
+5. **Memory Persistence** - Decisions saved across sessions
+
+**No manual configuration needed** - The Task tool acts as a universal adapter between Claude Code's interface and the complex multi-agent system, handling all orchestration automatically.
+
 ### Using Slash Commands
-The framework integrates with Claude Code's slash command system:
+After activation, the framework integrates with Claude Code's slash command system:
 
 ```bash
 # In Claude Code terminal
