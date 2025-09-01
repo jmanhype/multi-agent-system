@@ -1,10 +1,10 @@
-# Multi-Agent System Framework
+# Multi-Agent System for Claude Code
 
-A comprehensive AI agent orchestration framework with advanced performance monitoring, automated hooks, and distributed consensus mechanisms for coordinating specialized AI agents on complex software engineering tasks.
+A comprehensive AI agent orchestration framework designed specifically for Claude Code CLI, providing advanced multi-agent coordination, automated workflows, and distributed task management for complex software engineering projects.
 
 ## 🚀 Overview
 
-This framework provides a complete ecosystem for AI agent swarms with real-time metrics collection, automated CI/CD hooks, Byzantine fault tolerance, and sophisticated coordination patterns. It includes performance monitoring, automated testing hooks, and distributed consensus protocols.
+This framework extends Claude Code's capabilities with a sophisticated multi-agent system featuring real-time performance monitoring, automated hooks, consensus mechanisms, and specialized agent templates. Built to leverage Claude Code's terminal-based interface, MCP integration, and natural language command processing.
 
 ## ✨ Key Features
 
@@ -77,51 +77,76 @@ This framework provides a complete ecosystem for AI agent swarms with real-time 
 └── docs/          # Documentation and references
 ```
 
-## 🔧 Installation
+## 🔧 Installation & Setup for Claude Code
 
-1. Clone the repository:
+### Prerequisites
+- Claude Code CLI installed (`npm install -g @anthropic/claude-code` or native install)
+- Active Claude Code account (run `claude --login` if needed)
+- Git repository initialized
+
+### Setup Steps
+
+1. Clone this framework into your `.claude` directory:
 ```bash
-git clone https://github.com/jmanhype/multi-agent-system.git
-cd multi-agent-system
+# In your project root
+git clone https://github.com/jmanhype/multi-agent-system.git .claude
+cd .claude
 ```
 
-2. Initialize MCP servers:
+2. Initialize MCP servers for Claude Code:
 ```bash
 ./init-mcp.sh
+# This configures MCP servers for file operations, search, and integrations
 ```
 
-3. Configure your environment:
+3. Configure Claude Code settings:
 ```bash
 cp settings.json settings.local.json
-# Edit settings.local.json with your configuration
+# Edit settings.local.json with your preferences
 ```
 
-## 🎯 Quick Start
-
-### Initialize a Swarm
+4. Launch Claude Code with the framework:
 ```bash
-# Create a hierarchical swarm with 5 agents
-./helpers/quick-start.sh
+# From your project root
+claude
+# The framework is now available through slash commands
 ```
 
-### Spawn Specialized Agents
-```javascript
-// Example: Spawn a code review swarm
-{
-  "command": "swarm-init",
-  "topology": "hierarchical",
-  "agents": ["reviewer", "tester", "analyzer"]
-}
+## 🎯 Quick Start with Claude Code
+
+### Using Slash Commands
+The framework integrates with Claude Code's slash command system:
+
+```bash
+# In Claude Code terminal
+/swarm-init mesh 5
+# Initializes a mesh topology with 5 agents
+
+/agent-spawn reviewer
+# Spawns a specialized code review agent
+
+/task-orchestrate "Refactor authentication module"
+# Orchestrates task across available agents
 ```
 
-### Execute a Task
-```javascript
-// Orchestrate a complex task across the swarm
-{
-  "command": "task-orchestrate",
-  "task": "Refactor authentication module",
-  "strategy": "parallel"
-}
+### Natural Language Commands
+Simply describe what you want in plain English:
+
+```bash
+# In Claude Code
+"Initialize a swarm of agents to review and refactor the authentication module"
+"Create a performance monitoring dashboard for the current codebase"
+"Set up automated testing hooks for all Python files"
+```
+
+### Using with MCP Servers
+The framework leverages Claude Code's MCP integration:
+
+```bash
+# Access through MCP tools
+"Use the swarm coordinator to analyze code quality"
+"Deploy consensus agents for architectural decisions"
+"Enable performance monitoring for all active agents"
 ```
 
 ## 📚 Use Cases
@@ -147,45 +172,90 @@ Integrate with GitHub for automated workflows:
 - Release coordination
 - Multi-repo synchronization
 
-## 🛠️ Advanced Features
+## 🛠️ Advanced Claude Code Features
 
-### Hive Mind Mode
-Enable distributed intelligence with shared memory:
+### Custom Commands (.claude/commands)
+Store frequently used prompts as markdown files:
 ```bash
-commands/hive-mind/hive-mind-init.md
+# Creates reusable slash commands
+echo "Review this code for security issues" > .claude/commands/security-review.md
+# Use in Claude Code: /security-review
 ```
 
-### Consensus Operations
-Implement Byzantine fault-tolerant consensus:
+### Hook Integration
+Automated workflows that trigger on Claude Code events:
 ```bash
-agents/consensus/byzantine-coordinator.md
+# Pre-run validation
+.claude/hooks/pre_run.sh
+# Post-execution analysis
+.claude/hooks/post_run.sh
+# Verification gates
+.claude/hooks/verify_gate.sh
 ```
 
-### Performance Monitoring
-Real-time system metrics and optimization:
+### MCP Server Configuration
+The framework includes pre-configured MCP servers for Claude Code:
+- **File Operations**: Direct file manipulation
+- **Search**: Advanced codebase search
+- **Execution**: Safe command execution
+- **GitHub Integration**: PR and issue management
+- **Swarm Coordination**: Multi-agent orchestration
+
+Configure additional servers in `.claude/mcp/servers.json`.
+
+### Performance Monitoring Dashboard
+Real-time metrics visible in Claude Code:
 ```bash
-commands/monitoring/real-time-view.md
+# Launch monitoring
+/performance-monitor
+# View agent metrics
+/agent-metrics
+# Check swarm status
+/swarm-status
 ```
 
-## 🔌 MCP Integration
+## 💡 Claude Code Tips & Best Practices
 
-The framework integrates with Model Context Protocol servers for:
-- File system operations
-- Code execution
-- Repository management
-- Search capabilities
+### Optimize Token Usage
+- Use `/clear` frequently to reset context when starting new tasks
+- Enable `--dangerously-skip-permissions` for automated workflows (use with caution)
+- Navigate history with up arrow or double-Escape for message list
 
-Configure MCP servers in `mcp/servers.json`.
+### File Management
+- Hold Shift while dragging files to reference them properly
+- Use tab-completion for quick file/folder references
+- Store large contexts in `.claude/commands/` for reuse
+
+### Model Selection
+- Default: Opus (complex tasks) → Sonnet (after 50% usage)
+- Use `/model opus` for complex architecture decisions
+- Use `/model sonnet` for quick implementations
+
+### Session Management
+- Credentials stored locally after `/login`
+- Sessions persist across terminal restarts
+- Use continuation IDs for long-running tasks
 
 ## 📖 Documentation
 
+### Claude Code Resources
+- [Official Claude Code Docs](https://docs.anthropic.com/en/docs/claude-code/overview)
+- [Claude Code Quickstart](https://docs.anthropic.com/en/docs/claude-code/quickstart)
+- [MCP Integration Guide](https://docs.anthropic.com/en/docs/claude-code/mcp)
+
+### Framework Documentation
 - [Command Reference](docs/MCP_COMMANDS_REFERENCE.md)
 - [Agent Templates](agents/README.md)
 - [Workflow Examples](workflows/example-workflows.md)
+- [Hook System](hooks/README.md)
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit pull requests or open issues for bugs and feature requests.
+Contributions are welcome! This framework is designed to extend Claude Code's capabilities. Please:
+- Follow Claude Code conventions for slash commands
+- Test with multiple Claude models
+- Document MCP server requirements
+- Include example usage in natural language
 
 ## 📄 License
 
@@ -195,7 +265,9 @@ This project is open source and available under the MIT License.
 
 - [Repository](https://github.com/jmanhype/multi-agent-system)
 - [Issues](https://github.com/jmanhype/multi-agent-system/issues)
+- [Claude Code Official](https://claude.ai/code)
+- [Claude Developers Discord](https://discord.gg/claude-dev)
 
 ---
 
-Built with AI agent orchestration in mind. Designed for scalable, collaborative problem-solving.
+Built specifically for Claude Code CLI. Enhances Claude's terminal-based coding assistant with multi-agent orchestration, automated workflows, and distributed task management.
