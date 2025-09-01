@@ -1,0 +1,34 @@
+[
+  {
+    "timestamp": "2025-09-01T10:55:07.469184",
+    "tool_name": "",
+    "tool_input": {},
+    "blocked": false,
+    "reason": "approved",
+    "input_data": {}
+  },
+  {
+    "timestamp": "2025-09-01T10:55:19.134257",
+    "tool_name": "",
+    "tool_input": {},
+    "blocked": false,
+    "reason": "approved",
+    "input_data": {}
+  },
+  {
+    "timestamp": "2025-09-01T10:55:31.732842",
+    "tool_name": "",
+    "tool_input": {},
+    "blocked": false,
+    "reason": "approved",
+    "input_data": {}
+  },
+  {
+    "timestamp": "2025-09-01T10:55:41.688795",
+    "tool_name": "",
+    "tool_input": {},
+    "blocked": false,
+    "reason": "approved",
+    "input_data": {}
+  }
+]

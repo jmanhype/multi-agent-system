@@ -1,0 +1,86 @@
+{
+  "mcpServers": {
+    "claude-flow": {
+      "command": "npx",
+      "args": ["claude-flow@alpha", "mcp", "start"],
+      "enabled": true,
+      "priority": 1
+    },
+    "ruv-swarm": {
+      "command": "npx",
+      "args": ["ruv-swarm", "mcp"],
+      "enabled": true,
+      "priority": 2
+    },
+    "flow-nexus": {
+      "command": "npx",
+      "args": ["flow-nexus", "mcp"],
+      "enabled": true,
+      "priority": 3
+    },
+    "exa": {
+      "command": "npx",
+      "args": ["exa-mcp-server"],
+      "env": {
+        "EXA_API_KEY": "${EXA_API_KEY}"
+      },
+      "enabled": true,
+      "priority": 4
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-playwright"],
+      "enabled": true,
+      "priority": 5
+    },
+    "browsermcp": {
+      "command": "npx",
+      "args": ["browser-mcp"],
+      "enabled": true,
+      "priority": 6
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["@upstash/context7-mcp"],
+      "enabled": true,
+      "priority": 7
+    },
+    "task-master-ai": {
+      "command": "npx",
+      "args": ["task-master-ai", "mcp"],
+      "enabled": true,
+      "priority": 8
+    },
+    "zen": {
+      "command": "npx",
+      "args": ["zen-mcp"],
+      "enabled": true,
+      "priority": 9
+    },
+    "rube": {
+      "command": "npx",
+      "args": ["rube-mcp"],
+      "enabled": true,
+      "priority": 10
+    },
+    "apollo-dgraph": {
+      "command": "npx",
+      "args": ["apollo-dgraph-mcp"],
+      "enabled": true,
+      "priority": 11
+    },
+    "apollo-dagger": {
+      "command": "npx",
+      "args": ["apollo-dagger-mcp"],
+      "enabled": true,
+      "priority": 12
+    }
+  },
+  "serverDefaults": {
+    "transport": "stdio",
+    "timeout": 30000,
+    "retryOnError": true,
+    "maxRetries": 3,
+    "backoffMs": 1000
+  }
+}

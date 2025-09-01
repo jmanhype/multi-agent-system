@@ -1,0 +1,113 @@
+# MCP Client Configuration
+# Settings for connecting to MCP servers
+
+mcpVersion: "0.1.0"
+
+clients:
+  default:
+    name: "claude-code-default"
+    version: "1.0.0"
+    capabilities:
+      - "filesystem"
+      - "memory"
+      - "tools"
+    transport:
+      type: "stdio"
+    timeout: 30000
+    retry:
+      maxRetries: 3
+      backoffMs: 1000
+
+  pipeline:
+    name: "pipeline-client"
+    version: "1.0.0"
+    capabilities:
+      - "streaming"
+      - "backpressure"
+      - "ndjson"
+    transport:
+      type: "http"
+      url: "http://localhost:3001"
+    timeout: 60000
+    retry:
+      maxRetries: 5
+      backoffMs: 2000
+
+  playwright:
+    name: "browser-automation"
+    version: "1.0.0"
+    capabilities:
+      - "navigation"
+      - "interaction"
+      - "screenshot"
+    transport:
+      type: "stdio"
+    timeout: 45000
+    retry:
+      maxRetries: 2
+      backoffMs: 5000
+
+# Global Client Settings
+global:
+  defaultTimeout: 30000
+  maxConcurrentRequests: 10
+  enableMetrics: true
+  metricsInterval: 60000
+  
+  # Connection pooling
+  connectionPool:
+    maxConnections: 20
+    idleTimeout: 300000
+    acquireTimeout: 10000
+    
+  # Logging configuration
+  logging:
+    level: "info"
+    enableTracing: true
+    traceLevel: "debug"
+    logFile: "logs/mcp-client.log"
+    
+  # Error handling
+  errorHandling:
+    retryOnNetworkError: true
+    retryOnTimeout: true
+    maxRetryDelay: 30000
+    exponentialBackoff: true
+
+# Security settings for client connections
+security:
+  tlsVerify: true
+  allowSelfSigned: false
+  certificatePinning: false
+  maxRedirects: 5
+  
+  # Authentication (if required)
+  auth:
+    type: "none" # none, bearer, basic, oauth
+    credentials: {}
+
+# Performance tuning
+performance:
+  keepAlive: true
+  keepAliveMsecs: 30000
+  maxSockets: 50
+  maxFreeSockets: 10
+  compression: true
+  
+  # Request/response limits
+  limits:
+    maxResponseSize: "50MB"
+    maxRequestSize: "10MB"
+    timeout:
+      connection: 10000
+      request: 30000
+      response: 30000
+
+# Development settings
+development:
+  enableDebugMode: false
+  verboseLogging: false
+  mockResponses: false
+  recordRequests: false
+  replayFile: "tests/recorded-requests.json"
+EOF < /dev/null
