@@ -1,19 +1,33 @@
 # Multi-Agent System for Claude Code
+## Powered by Claude-Flow v2.0.0 Alpha
 
-A comprehensive AI agent orchestration framework designed specifically for Claude Code CLI, providing advanced multi-agent coordination, automated workflows, and distributed task management for complex software engineering projects.
+A comprehensive AI agent orchestration framework built on [Claude-Flow v2.0.0 Alpha](https://github.com/ruvnet/claude-flow) - the revolutionary AI swarm orchestration platform. This implementation extends Claude Code CLI with enterprise-grade hive-mind intelligence, neural pattern recognition, and 87+ MCP tools for unprecedented AI-powered development workflows.
 
 ## 🚀 Overview
 
-This framework extends Claude Code's capabilities with a sophisticated multi-agent system featuring real-time performance monitoring, automated hooks, consensus mechanisms, and specialized agent templates. Built to leverage Claude Code's terminal-based interface, MCP integration, and natural language command processing.
+This framework leverages Claude-Flow's powerful swarm orchestration capabilities to provide:
+- **Hive-Mind Intelligence**: Queen-led AI coordination with 64 specialized worker agents
+- **Neural Networks**: 27+ cognitive models with WASM SIMD acceleration
+- **MCP Integration**: 87 comprehensive tools for swarm orchestration, memory, and automation
+- **Performance Metrics**: 84.8% SWE-Bench solve rate, 32.3% token reduction, 2.8-4.4x speed improvement
+
+Built specifically for Claude Code's terminal-based interface with seamless MCP integration and natural language command processing.
 
 ## ✨ Key Features
 
-### Agent Orchestration & Performance
-- **Swarm Topologies**: Hierarchical, mesh, ring, and star configurations with adaptive coordination
-- **Performance Monitor Agent**: Real-time metrics collection, SLA monitoring, anomaly detection
-- **Resource Tracking**: Multi-dimensional metrics for system, agent, coordination, and task execution
-- **Dynamic Scaling & Load Balancing**: Automatic topology optimization based on workload
-- **Consensus Mechanisms**: Raft, Byzantine fault tolerance, CRDT synchronization, Gossip protocols
+### Claude-Flow v2 Alpha Core Capabilities
+- **64 Specialized AI Agents**: Complete agent ecosystem across 16 categories
+- **Hive-Mind Architecture**: Queen-led coordination with worker specialization
+- **Neural Pattern Recognition**: 27+ cognitive models for advanced reasoning
+- **SQLite Memory System**: Persistent `.swarm/memory.db` with 12 specialized tables
+- **WASM SIMD Acceleration**: High-performance neural network operations
+
+### Swarm Intelligence & Coordination
+- **Swarm Topologies**: Hierarchical, mesh, ring, and star configurations
+- **Dynamic Self-Organization**: Agents adapt and reorganize based on task requirements
+- **Fault Tolerance**: Automatic failover and recovery mechanisms
+- **Consensus Protocols**: Raft, Byzantine, CRDT, Gossip implementations
+- **Performance Metrics**: 84.8% SWE-Bench solve rate with 2.8-4.4x speed improvement
 
 ### Automated Hooks & CI/CD
 - **Pre-run Hooks**: Automatic linting, type checking, and unit testing for Python, Node.js, Rust, and Elixir projects
@@ -77,40 +91,44 @@ This framework extends Claude Code's capabilities with a sophisticated multi-age
 └── docs/          # Documentation and references
 ```
 
-## 🔧 Installation & Setup for Claude Code
+## 🔧 Installation & Setup
 
 ### Prerequisites
 - Claude Code CLI installed (`npm install -g @anthropic/claude-code` or native install)
 - Active Claude Code account (run `claude --login` if needed)
-- Git repository initialized
+- Node.js 18+ for Claude-Flow integration
 
-### Setup Steps
+### Quick Install with Claude-Flow
 
-1. Clone this framework into your `.claude` directory:
 ```bash
-# In your project root
+# Install Claude-Flow Alpha globally
+npm install -g claude-flow@alpha
+
+# Initialize in your project with enhanced MCP setup
+npx claude-flow@alpha init --force
+
+# Clone this framework configuration
 git clone https://github.com/jmanhype/multi-agent-system.git .claude
 cd .claude
-```
 
-2. Initialize MCP servers for Claude Code:
-```bash
+# Initialize MCP servers including Claude-Flow
 ./init-mcp.sh
-# This configures MCP servers for file operations, search, and integrations
 ```
 
-3. Configure Claude Code settings:
-```bash
-cp settings.json settings.local.json
-# Edit settings.local.json with your preferences
-```
+### Launch Options
 
-4. Launch Claude Code with the framework:
 ```bash
-# From your project root
+# Quick AI coordination (simple tasks)
+npx claude-flow@alpha swarm "your task here" --claude
+
+# Full hive-mind system (complex projects)
+npx claude-flow@alpha hive-mind wizard
+
+# Standard Claude Code with framework
 claude
-# The framework is now available through slash commands
 ```
+
+**Quick Rule**: Start with `swarm` for most tasks. Use `hive-mind` when you need persistent sessions or complex multi-agent coordination.
 
 ## 🎯 Quick Start with Claude Code
 
@@ -263,11 +281,21 @@ This project is open source and available under the MIT License.
 
 ## 🔗 Links
 
+### Project Resources
 - [Repository](https://github.com/jmanhype/multi-agent-system)
 - [Issues](https://github.com/jmanhype/multi-agent-system/issues)
+
+### Claude-Flow Resources
+- [Claude-Flow v2.0.0 Alpha](https://github.com/ruvnet/claude-flow)
+- [Claude-Flow Wiki](https://github.com/ruvnet/claude-flow/wiki)
+- [Installation Guide](https://github.com/ruvnet/claude-flow/wiki/Installation-Guide)
+- [Agent System Overview](https://github.com/ruvnet/claude-flow/wiki/Agent-System-Overview)
+
+### Claude Code Resources
 - [Claude Code Official](https://claude.ai/code)
+- [Claude Code Docs](https://docs.anthropic.com/en/docs/claude-code/overview)
 - [Claude Developers Discord](https://discord.gg/claude-dev)
 
 ---
 
-Built specifically for Claude Code CLI. Enhances Claude's terminal-based coding assistant with multi-agent orchestration, automated workflows, and distributed task management.
+**Built on Claude-Flow v2.0.0 Alpha** - The revolutionary AI swarm orchestration platform for Claude Code CLI. This framework provides enterprise-grade hive-mind intelligence, neural pattern recognition, and comprehensive MCP integration for unprecedented AI-powered development workflows.
