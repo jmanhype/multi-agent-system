@@ -1,0 +1,10 @@
+{
+  "exchanges": {
+    "binance": {
+      "type": "ccxt",
+      "apiKey": "${BINANCE_KEY}",
+      "secret": "${BINANCE_SECRET}",
+      "sandbox": true
+    }
+  }
+}

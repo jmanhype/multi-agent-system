@@ -1,0 +1,25 @@
+{
+  "bankroll_usd": 250,
+  "per_trade_cap_usd": 62.5,
+  "symbols": ["BTC/USDT"],
+  "bar_interval": "5m",
+  "mode": "paper",
+  "schedule": { "exec_cron": "*/5 * * * *", "research_cron": "0 6 * * *" },
+  "research": {
+    "dataset_snapshot": "data/snapshots/btcusdt_5m_2022_2024.pkl",
+    "dspy": {
+      "enabled": true,
+      "max_candidates": 20,
+      "seed": 42,
+      "gepa": { "enabled": true, "iterations": 2, "batch_worst_k": 12 }
+    },
+    "fallback_grid": {
+      "ema_fast": [12, 20, 24],
+      "ema_slow": [50, 60, 72],
+      "rsi_entry": [28, 30, 32],
+      "rsi_exit": [68, 70, 72],
+      "tp": [0.08, 0.10, 0.12],
+      "sl": [0.10, 0.12, 0.15]
+    }
+  }
+}

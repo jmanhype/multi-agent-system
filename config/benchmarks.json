@@ -1,0 +1,6 @@
+{
+  "min_total_return": 0.10,
+  "min_trades": 50,
+  "min_sortino": 1.2,
+  "max_drawdown": 0.25
+}

@@ -1,0 +1,16 @@
+{
+  "id": "ema_rsi_tp_sl_v1",
+  "universe": ["BTC/USDT"],
+  "timeframes": ["5m"],
+  "regime": { "type": "ema_cross", "fast": 20, "slow": 50, "direction": "up" },
+  "entry":  { "type": "rsi", "op": "below", "threshold": 30 },
+  "exit":   { "type": "rsi", "op": "above", "threshold": 70 },
+  "risk":   { "tp": 0.10, "sl": 0.12, "max_orders": 1, "atr_cap_pct": 0.03 },
+  "execution": {
+    "order_type": "market",
+    "fees": { "maker_bps": 1.0, "taker_bps": 4.0 },
+    "slippage": { "model": "impact", "k": 1.2 },
+    "latency_ms": 250,
+    "lot": { "min_qty": 0.0001, "tick": 0.10 }
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "atr_cap_pct": 0.03,
+  "max_live_dd": 0.20,
+  "max_live_latency_ms": 800
+}

@@ -1,0 +1,1 @@
+{ "canary_size_usd": 25, "max_daily_loss": 5, "max_consecutive_losses": 4, "max_latency_ms": 800 }
