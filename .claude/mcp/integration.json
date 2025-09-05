@@ -70,6 +70,23 @@
         "appIntegration": true,
         "multiTool": true
       }
+    },
+    "mobile": {
+      "automation": {
+        "enabled": true,
+        "deviceControl": true,
+        "appLaunching": true,
+        "uiInteraction": true
+      },
+      "platforms": {
+        "android": true,
+        "ios": true,
+        "emulator": true
+      },
+      "coordination": {
+        "swarmIntegration": true,
+        "workflowOrchestration": true
+      }
     }
   },
   "crossIntegration": {
