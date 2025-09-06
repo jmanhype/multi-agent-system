@@ -1,7 +1,7 @@
 {
-  "id": "gen2_child_2",
+  "id": "dex_adapted_winner",
   "universe": [
-    "MICHI/USD"
+    "POPCAT"
   ],
   "timeframes": [
     "5m"
@@ -43,6 +43,11 @@
       "min_qty": 0.0001,
       "tick": 0.1
     }
+  },
+  "data_source": {
+    "type": "pickle",
+    "path": "data/models/big_optimize_1016.pkl",
+    "adapter": "dex"
   },
   "metrics": {
     "sharpe_ratio": 3.8044228123458717,

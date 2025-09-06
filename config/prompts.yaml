@@ -1,0 +1,125 @@
+analysis:
+  portfolio_comparison: 'Compare performance across assets:
+
+    {asset_performance_table}
+
+
+    Identify:
+
+    1. Which assets perform best with current strategy
+
+    2. Common patterns in winners vs losers
+
+    3. Suggested parameter adjustments per asset'
+  trade_breakdown: 'Analyze the following trade statistics:
+
+    - Best trades: {best_trades}
+
+    - Worst trades: {worst_trades}
+
+    - Average hold time: {avg_hold_time}
+
+    - Win/Loss streaks: {streaks}
+
+
+    Identify patterns that led to success/failure.
+
+    '
+benchmarks:
+  dex_tokens:
+    max_drawdown: 0.3
+    min_profit_factor: 1.2
+    min_sharpe: 0.3
+    min_trades: 100
+    min_win_rate: 0.4
+  traditional:
+    max_drawdown: 0.2
+    min_profit_factor: 1.5
+    min_sharpe: 1.0
+    min_trades: 500
+    min_win_rate: 0.45
+gepa_optimized:
+  '20250906_101315':
+    asset: $MICHI
+    date: '2025-09-06T10:14:11.244550'
+    file: gepa_optimized_20250906_101411.yaml
+  '20250906_103154':
+    asset: $MICHI
+    date: '2025-09-06T10:32:08.577315'
+    file: gepa_optimized_20250906_103208.yaml
+  '20250906_103424':
+    asset: $MICHI
+    date: '2025-09-06T10:34:44.706579'
+    file: gepa_optimized_20250906_103444.yaml
+  '20250906_105428':
+    asset: $MICHI
+    date: '2025-09-06T10:54:40.595507'
+    file: gepa_optimized_20250906_105440.yaml
+  '20250906_111205':
+    asset: $MICHI
+    date: '2025-09-06T11:12:34.027741'
+    file: gepa_optimized_20250906_111234.yaml
+  '20250906_111429':
+    asset: $MICHI
+    date: '2025-09-06T11:14:40.216068'
+    file: gepa_optimized_20250906_111440.yaml
+  '20250906_111552':
+    asset: $MICHI
+    date: '2025-09-06T11:16:15.267292'
+    file: gepa_optimized_20250906_111615.yaml
+  '20250906_111907':
+    asset: $MICHI
+    date: '2025-09-06T11:19:31.016984'
+    file: gepa_optimized_20250906_111931.yaml
+  '20250906_112046':
+    asset: $MICHI
+    date: '2025-09-06T11:21:10.691700'
+    file: gepa_optimized_20250906_112110.yaml
+  '20250906_112217':
+    asset: $MICHI
+    date: '2025-09-06T11:22:39.510580'
+    file: gepa_optimized_20250906_112239.yaml
+  '20250906_112446':
+    asset: $MICHI
+    date: '2025-09-06T11:26:34.339901'
+    file: gepa_optimized_20250906_112634.yaml
+strategy_generation:
+  evolution_guidance: 'Based on the previous generation''s performance:
+
+    - Best Sharpe: {best_sharpe}
+
+    - Best Win Rate: {best_win_rate}
+
+    - Worst Drawdown: {worst_drawdown}
+
+
+    Suggest improvements to the strategy focusing on:
+
+    {improvement_focus}
+
+    '
+  market_analysis: 'Analyze the current market conditions for {asset}:
+
+    - Trend: {trend}
+
+    - Volatility: {volatility}
+
+    - Volume Profile: {volume_profile}
+
+    Generate a trading strategy that exploits these conditions.
+
+    '
+  strategy_proposal: 'Create a trading strategy with the following constraints:
+
+    {constraints}
+
+
+    Required format:
+
+    - Type: momentum/mean_reversion/breakout/ma_crossover
+
+    - Parameters: lookback, entry_threshold, exit_threshold
+
+    - Risk Management: stop_loss, take_profit, position_size
+
+    '

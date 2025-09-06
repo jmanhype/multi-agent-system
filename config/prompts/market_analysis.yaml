@@ -1,0 +1,343 @@
+# Market Analysis and Regime Detection Prompts
+
+# Market regime classification
+regime_classification: |
+  Analyze current market regime for {symbol} using multiple indicators:
+  
+  Price Data (Recent {lookback_periods} periods):
+  {price_data_summary}
+  
+  Technical Indicators:
+  - EMA 20/50 relationship: {ema_relationship}
+  - RSI level: {rsi_level}
+  - MACD status: {macd_status}  
+  - ATR percentile: {atr_percentile}
+  - Volume trend: {volume_trend}
+  
+  Classify into one of these regimes:
+  
+  1. BULL_TRENDING: Strong upward momentum
+     - EMA20 > EMA50, both rising
+     - RSI 40-70 range
+     - Volume increasing on up moves
+     
+  2. BEAR_TRENDING: Strong downward momentum  
+     - EMA20 < EMA50, both falling
+     - RSI 30-60 range
+     - Volume increasing on down moves
+     
+  3. SIDEWAYS_RANGE: Choppy, range-bound
+     - EMAs converging/crossing frequently
+     - RSI oscillating 30-70
+     - Low ATR, no clear direction
+     
+  4. HIGH_VOLATILITY: Increased uncertainty
+     - ATR > 80th percentile
+     - Large price swings
+     - Volume spikes
+     
+  5. BREAKOUT_SETUP: Potential breakout forming
+     - Narrowing volatility
+     - Volume declining (coiling)
+     - Technical levels nearby
+  
+  Provide regime classification with confidence score (0-1).
+
+# Multi-timeframe analysis
+multi_timeframe_analysis: |
+  Perform multi-timeframe analysis for {symbol}:
+  
+  Timeframes to analyze: {timeframes}
+  
+  For each timeframe, determine:
+  1. Trend direction (up/down/sideways)
+  2. Momentum strength (weak/medium/strong)
+  3. Support/resistance levels
+  4. Key technical patterns
+  
+  Primary Trend (Daily/4H): {primary_timeframe}
+  Entry Timing (1H/15M): {entry_timeframe}
+  
+  Timeframe Alignment Rules:
+  - Only trade WITH primary trend direction
+  - Use shorter timeframes for entry timing
+  - Avoid counter-trend trades unless clear reversal
+  
+  Current Analysis:
+  {current_market_state}
+  
+  Provide trading bias and optimal timeframes for entry.
+
+# Volatility regime analysis
+volatility_analysis: |
+  Analyze volatility regime for portfolio risk management:
+  
+  Current Volatility Metrics:
+  - Realized volatility (30d): {realized_vol_30d}
+  - ATR percentile: {atr_percentile}
+  - GARCH forecast: {garch_forecast}
+  - Volatility clustering: {vol_clustering}
+  
+  Historical Context:
+  - 1-year volatility range: {vol_range_1y}
+  - Volatility persistence: {vol_persistence}
+  - Mean reversion tendency: {mean_reversion}
+  
+  Volatility Regimes:
+  1. LOW_VOL (ATR < 25th percentile)
+     - Tight ranges, low risk
+     - Mean reversion strategies preferred
+     - Larger position sizes acceptable
+     
+  2. NORMAL_VOL (25th-75th percentile)
+     - Standard operating conditions
+     - Trend-following and momentum strategies
+     - Normal position sizing
+     
+  3. HIGH_VOL (ATR > 75th percentile)
+     - Increased uncertainty
+     - Reduced position sizes
+     - Breakout strategies may work
+     
+  4. EXTREME_VOL (ATR > 95th percentile)
+     - Crisis conditions
+     - Risk-off positioning
+     - Consider hedging/cash positions
+  
+  Provide volatility regime and position sizing recommendations.
+
+# Market microstructure analysis
+microstructure_analysis: |
+  Analyze market microstructure for {symbol}:
+  
+  Order Book Data:
+  - Bid-ask spread: {bid_ask_spread}
+  - Market depth (5 levels): {market_depth}
+  - Order imbalance: {order_imbalance}
+  - Large order detection: {large_orders}
+  
+  Trade Flow Analysis:
+  - Aggressive buy/sell ratio: {aggressor_ratio}
+  - Average trade size: {avg_trade_size}
+  - High-frequency activity: {hft_activity}
+  - Institutional flow signals: {institutional_flow}
+  
+  Liquidity Assessment:
+  - Kyle's Lambda: {kyle_lambda}
+  - Amihud illiquidity: {amihud_ratio}
+  - Effective spread: {effective_spread}
+  - Price impact: {price_impact}
+  
+  Market Quality Metrics:
+  1. Execution quality (slippage expectations)
+  2. Optimal order sizing
+  3. Best execution timing
+  4. Market impact minimization
+  
+  Provide microstructure insights for optimal execution.
+
+# Sentiment analysis integration
+sentiment_analysis: |
+  Integrate market sentiment with technical analysis:
+  
+  Technical Signals: {technical_signals}
+  
+  Sentiment Indicators:
+  - Social media mentions: {social_mentions}
+  - News sentiment score: {news_sentiment}
+  - Options put/call ratio: {put_call_ratio}
+  - Futures positioning: {futures_positioning}
+  
+  Sentiment-Technical Matrix:
+  
+  BULLISH Technical + BULLISH Sentiment:
+  - High confidence long signals
+  - Momentum strategies preferred
+  - Extended position sizes
+  
+  BULLISH Technical + BEARISH Sentiment:
+  - Contrarian opportunity
+  - Value-based entries
+  - Conservative sizing
+  
+  BEARISH Technical + BULLISH Sentiment:
+  - Potential reversal setup
+  - Wait for confirmation
+  - Avoid new longs
+  
+  BEARISH Technical + BEARISH Sentiment:
+  - High confidence short signals
+  - Trend continuation expected
+  - Risk management critical
+  
+  Provide sentiment-adjusted trading recommendations.
+
+# Sector rotation analysis
+sector_rotation: |
+  Analyze sector rotation patterns within crypto ecosystem:
+  
+  Sector Performance (30d returns):
+  - DeFi tokens: {defi_performance}
+  - Meme coins: {meme_performance}
+  - Layer 1s: {l1_performance}
+  - Gaming tokens: {gaming_performance}
+  - NFT-related: {nft_performance}
+  
+  Rotation Indicators:
+  - Volume flow between sectors
+  - Relative strength rankings
+  - Leadership changes
+  - Correlation breakdowns
+  
+  Current Rotation Phase:
+  1. RISK_ON: Money flowing to speculative alts
+  2. RISK_OFF: Flight to BTC/ETH quality
+  3. SECTOR_SPECIFIC: Narrative-driven rotation
+  4. MEAN_REVERSION: Oversold sectors bouncing
+  
+  Sector Allocation Recommendations:
+  - Overweight sectors: {overweight_sectors}
+  - Underweight sectors: {underweight_sectors}
+  - Rotation timing: {rotation_timing}
+
+# Market structure shifts
+market_structure_analysis: |
+  Detect shifts in underlying market structure:
+  
+  Structural Indicators:
+  - Average daily range changes
+  - Intraday mean reversion vs momentum
+  - Gap behavior (overnight vs intraday)
+  - Volume profile shifts
+  
+  Recent Changes Detected:
+  {structural_changes}
+  
+  Regime Change Signals:
+  1. Volatility regime shifts
+  2. Correlation structure changes  
+  3. Trading pattern evolution
+  4. Liquidity condition changes
+  
+  Strategy Adaptation Required:
+  - Parameter adjustments needed
+  - Strategy type changes
+  - Risk management updates
+  - Execution method modifications
+  
+  Historical Context:
+  - Similar periods in past: {historical_analogs}
+  - Duration of previous regime: {regime_duration}
+  - Transition characteristics: {transition_patterns}
+
+# Economic calendar integration
+economic_calendar: |
+  Integrate economic events with trading strategy:
+  
+  Upcoming Events (Next 7 days):
+  {upcoming_events}
+  
+  Event Impact Assessment:
+  - HIGH impact: Major policy decisions, GDP, employment
+  - MEDIUM impact: Inflation data, retail sales
+  - LOW impact: Minor economic indicators
+  
+  Pre-Event Positioning:
+  - Reduce position sizes before HIGH impact events
+  - Hedge tail risks with options/futures
+  - Prepare for volatility expansion
+  
+  Post-Event Analysis:
+  - Market reaction vs expectations
+  - Trend continuation or reversal
+  - Volatility normalization timing
+  
+  Event-Driven Strategy Adjustments:
+  1. Position sizing modifications
+  2. Stop loss adjustments  
+  3. Time-based exit rules
+  4. Hedging requirements
+
+# Cross-asset correlation analysis
+cross_asset_correlation: |
+  Analyze correlations between crypto and traditional assets:
+  
+  Correlation Matrix (30-day rolling):
+  - BTC vs S&P 500: {btc_spy_corr}
+  - BTC vs Gold: {btc_gold_corr}
+  - BTC vs USD Index: {btc_dxy_corr}
+  - BTC vs 10Y Treasury: {btc_10y_corr}
+  
+  Crypto Internal Correlations:
+  - BTC vs Altcoins: {btc_alt_corr}
+  - ETH vs DeFi: {eth_defi_corr}
+  - Meme coin cluster: {meme_corr}
+  
+  Correlation Regimes:
+  1. DECOUPLED: Crypto independent of tradfi
+  2. COUPLED: High correlation with risk assets
+  3. SAFE_HAVEN: Negative correlation (rare)
+  4. CRISIS: All correlations → 1.0
+  
+  Portfolio Implications:
+  - Diversification benefits
+  - Hedging opportunities  
+  - Risk concentration areas
+  - Scenario planning requirements
+
+# Market efficiency analysis
+efficiency_analysis: |
+  Assess market efficiency and alpha opportunities:
+  
+  Efficiency Metrics:
+  - Price discovery speed: {discovery_speed}
+  - Arbitrage opportunities: {arbitrage_count}
+  - Information incorporation: {info_speed}
+  - Random walk deviations: {rw_deviations}
+  
+  Inefficiency Sources:
+  1. Information asymmetries
+  2. Structural market features
+  3. Behavioral biases
+  4. Liquidity constraints
+  
+  Alpha Generation Opportunities:
+  - Statistical arbitrage: {stat_arb_alpha}
+  - Momentum anomalies: {momentum_alpha}
+  - Mean reversion: {mean_rev_alpha}
+  - News-based trading: {news_alpha}
+  
+  Strategy Recommendations:
+  - Focus on inefficient timeframes/assets
+  - Exploit behavioral patterns
+  - Leverage information advantages
+  - Account for efficiency evolution
+
+# Risk regime identification
+risk_regime_detection: |
+  Identify current risk regime across markets:
+  
+  Risk Indicators:
+  - VIX level and term structure: {vix_data}
+  - Credit spreads: {credit_spreads}
+  - Currency volatility: {fx_vol}
+  - Commodity stress: {commodity_stress}
+  
+  Risk Regimes:
+  1. LOW_RISK: Stable conditions, risk-on
+  2. MEDIUM_RISK: Some uncertainty, mixed signals
+  3. HIGH_RISK: Elevated stress, risk-off
+  4. CRISIS: Extreme conditions, liquidity concerns
+  
+  Current Assessment: {current_risk_regime}
+  
+  Portfolio Adjustments by Regime:
+  - Position sizing modifications
+  - Correlation assumptions
+  - Hedging requirements
+  - Cash allocation changes
+  
+  Early Warning Signals:
+  - Leading indicators to monitor
+  - Threshold levels for regime change
+  - Automated response triggers
