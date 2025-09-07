@@ -359,9 +359,16 @@ def main():
     
     # Configure GEPA with learned patterns
     logger.info("\nConfiguring enhanced GEPA optimizer...")
+    
+    # Use DSPy's auto budget calculation instead of fixed metric calls
+    # This will calculate ~404 metric calls for our 6 examples with light budget
+    # Medium would be ~720, Heavy would be ~800+
+    budget_mode = os.getenv('GEPA_BUDGET', 'light')  # Allow override via env var
+    logger.info(f"Using budget mode: {budget_mode}")
+    
     optimizer = GEPA(
         metric=metric,
-        max_metric_calls=200,  # Increased budget for better optimization
+        auto=budget_mode,  # Let DSPy calculate optimal budget based on dataset size
         reflection_lm=reflection_lm,
         reflection_minibatch_size=3,  # Larger batches for pattern recognition
         candidate_selection_strategy="pareto",  # Multi-objective optimization
