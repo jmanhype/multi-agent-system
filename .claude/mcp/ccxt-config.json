@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "ccxt": {
+      "command": "mcp-server-ccxt",
+      "env": {
+        "DEFAULT_EXCHANGE": "coinbase",
+        "DEFAULT_MARKET_TYPE": "spot",
+        "BINANCEUS_API_KEY": "Yiw2dggUINRVqkIGVlRgbTWcV04LDL4DGu2wevHcyiRsdjAWG93rWHXOazfifJ5F",
+        "BINANCEUS_SECRET": "saTHx6u533KTCQEWcwYhBvzXeczmudUtR6Ltc3JEvdS49B6k7z01LbTrvRD28yFZ"
+      }
+    }
+  }
+}

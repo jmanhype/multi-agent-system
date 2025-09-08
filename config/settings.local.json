@@ -1,0 +1,36 @@
+{
+  "trading": {
+    "mode": "paper",
+    "exchange": "coinbase",
+    "symbol": "BTC/USD",
+    "position_size_usd": 62.5,
+    "stop_loss_pct": 0.02,
+    "take_profit_pct": 0.04,
+    "max_positions": 3
+  },
+  "risk": {
+    "max_daily_loss_usd": 100,
+    "max_drawdown_percent": 20,
+    "max_consecutive_losses": 5,
+    "position_sizing_method": "fixed_usd",
+    "leverage": 1
+  },
+  "features": {
+    "lookback_periods": [5, 10, 20, 50],
+    "technical_indicators": ["rsi", "macd", "bollinger", "ema"],
+    "volume_features": true,
+    "market_structure": true
+  },
+  "execution": {
+    "order_type": "market",
+    "slippage_tolerance": 0.001,
+    "retry_attempts": 3,
+    "retry_delay_seconds": 1
+  },
+  "monitoring": {
+    "health_check_interval": 60,
+    "circuit_breaker_enabled": true,
+    "alert_on_errors": true,
+    "log_level": "INFO"
+  }
+}

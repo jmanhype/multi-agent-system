@@ -1,0 +1,11 @@
+metadata:
+  asset: $MICHI
+  optimization_date: '2025-09-06T11:14:40.206059'
+  optimization_type: gepa_prompt_evolution
+  session_id: '20250906_111429'
+optimized_prompts:
+  generate_strategy.predict: Generate trading strategy based on market conditions
+  reason_metrics.predict: Reason about strategy performance metrics
+usage_instructions:
+  metric_reasoning: Use for predicting strategy performance with reasoning
+  strategy_generation: Use for generating DEX trading strategies

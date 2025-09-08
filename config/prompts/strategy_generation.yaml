@@ -1,0 +1,187 @@
+# Strategy Generation Prompts for DSPy Pipeline
+
+# Base strategy generation prompt
+base_generation: |
+  You are an expert algorithmic trading strategist specializing in cryptocurrency markets.
+  Generate a JSON strategy configuration for {symbol} trading on {timeframe} timeframe.
+  
+  The strategy must include:
+  1. Entry conditions (technical indicators, thresholds)
+  2. Exit conditions (profit targets, stop losses)  
+  3. Risk management (position sizing, max drawdown)
+  4. Market regime filters (trend, volatility)
+  
+  Use only proven technical indicators: RSI, EMA, MACD, Bollinger Bands.
+  Optimize for {target_metric} while maintaining {risk_tolerance} risk profile.
+  
+  Return ONLY valid JSON with no commentary.
+
+# Momentum strategy prompt
+momentum_strategy: |
+  Generate a momentum-based strategy for {symbol} with the following requirements:
+  
+  - Use EMA crossovers for trend direction
+  - RSI for entry timing (oversold/overbought levels)
+  - Volume confirmation for signal validation
+  - ATR-based stop losses and position sizing
+  - Maximum {max_positions} concurrent positions
+  
+  Target metrics:
+  - Sharpe ratio: > {min_sharpe}
+  - Win rate: > {min_win_rate}
+  - Maximum drawdown: < {max_drawdown}
+  
+  Schema:
+  {{
+    "name": "string",
+    "type": "momentum",
+    "universe": ["{symbol}"],
+    "timeframes": ["{timeframe}"],
+    "regime": {{"type": "ema_cross", "fast": int, "slow": int}},
+    "entry": {{"type": "rsi", "op": "below|above", "threshold": int}},
+    "exit": {{"type": "rsi", "op": "above|below", "threshold": int}},
+    "risk": {{"tp": float, "sl": float, "max_orders": int}}
+  }}
+
+# Mean reversion strategy prompt
+mean_reversion_strategy: |
+  Design a mean reversion strategy for {symbol} in sideways markets:
+  
+  - Bollinger Bands for overbought/oversold identification
+  - RSI divergence for entry confirmation
+  - Quick profit-taking (short hold times)
+  - Tight stop losses to limit risk
+  
+  Constraints:
+  - Only trade in low volatility regimes (ATR < {max_atr})
+  - Maximum position hold time: {max_hold_minutes} minutes
+  - Risk per trade: < {risk_per_trade}%
+  
+  Focus on high-frequency, low-risk opportunities.
+
+# Breakout strategy prompt  
+breakout_strategy: |
+  Create a breakout strategy for {symbol} targeting trend continuation:
+  
+  - Price breakouts above/below key levels
+  - Volume surge confirmation (> {volume_multiplier}x average)
+  - Momentum follow-through with EMA alignment
+  - Trailing stops to capture extended moves
+  
+  Key parameters:
+  - Lookback period for support/resistance: {lookback_periods}
+  - Breakout threshold: {breakout_threshold}% above/below level
+  - Volume confirmation required: {require_volume_confirmation}
+  
+  Optimize for capturing large price movements while minimizing false breakouts.
+
+# Multi-asset correlation strategy
+correlation_strategy: |
+  Generate a pairs trading strategy for correlated assets {asset1} and {asset2}:
+  
+  - Monitor correlation coefficient (rolling {correlation_window} periods)
+  - Trade when correlation breaks down (z-score > {zscore_threshold})
+  - Long underperformer, short outperformer
+  - Close when correlation normalizes
+  
+  Risk controls:
+  - Maximum correlation deviation: {max_correlation_deviation}
+  - Position sizing based on volatility ratio
+  - Stop loss on individual legs: {individual_stop_loss}%
+
+# Market regime detection
+regime_detection: |
+  Classify current market regime for {symbol} using:
+  
+  1. Trend: EMA slopes and crossovers
+  2. Volatility: ATR percentiles vs historical
+  3. Volume: Average volume vs recent spikes  
+  4. Momentum: RSI and MACD divergences
+  
+  Output regimes:
+  - TRENDING_UP: Strong upward momentum
+  - TRENDING_DOWN: Strong downward momentum  
+  - SIDEWAYS: Range-bound, low volatility
+  - VOLATILE: High volatility, unclear direction
+  - BREAKOUT: Potential breakout setup
+  
+  Include confidence score (0-1) for each regime classification.
+
+# Risk assessment prompt
+risk_assessment: |
+  Evaluate strategy risk for {symbol} using these metrics:
+  
+  Backtesting Results:
+  - Total return: {total_return}%
+  - Sharpe ratio: {sharpe_ratio}
+  - Maximum drawdown: {max_drawdown}%  
+  - Win rate: {win_rate}%
+  - Number of trades: {num_trades}
+  
+  Market Context:
+  - Asset volatility: {volatility}%
+  - Liquidity: {avg_volume} daily volume
+  - Correlation with portfolio: {correlation}
+  
+  Assign risk score (1-10) and provide specific risk factors.
+  Suggest position sizing based on Kelly Criterion.
+
+# Strategy optimization prompt
+optimization_prompt: |
+  Optimize strategy parameters for {symbol} to improve {target_metric}:
+  
+  Current performance:
+  {current_metrics}
+  
+  Parameter ranges:
+  {parameter_ranges}
+  
+  Constraints:
+  - Maximum drawdown: < {max_drawdown_limit}%
+  - Minimum trades: > {min_trades}
+  - Sharpe ratio: > {min_sharpe}
+  
+  Suggest 5 parameter combinations to test, prioritizing:
+  1. Risk-adjusted returns
+  2. Trade frequency optimization
+  3. Drawdown minimization
+  4. Robustness across market conditions
+  
+  Format as JSON array of parameter dictionaries.
+
+# Portfolio allocation prompt
+portfolio_allocation: |
+  Optimize portfolio allocation across {num_assets} Solana meme coins:
+  
+  Assets: {asset_list}
+  Individual returns: {asset_returns}
+  Correlation matrix: {correlation_matrix}
+  
+  Allocation methods to consider:
+  1. Risk parity (inverse volatility weighting)
+  2. Momentum-based (recent performance)
+  3. Minimum variance (Markowitz)
+  4. Equal weight (benchmark)
+  
+  Constraints:
+  - Maximum single asset weight: {max_weight}%
+  - Minimum portfolio Sharpe: {min_portfolio_sharpe}
+  - Maximum portfolio correlation: {max_correlation}
+  
+  Return allocation weights and expected portfolio metrics.
+
+# Variable definitions for prompt substitution
+variables:
+  symbol: "Asset symbol (e.g. BTC/USD, BILLY/SOL)"
+  timeframe: "Timeframe (1m, 5m, 15m, 1h, 4h, 1d)"
+  target_metric: "Optimization target (sharpe_ratio, total_return, win_rate)"
+  risk_tolerance: "Risk level (conservative, moderate, aggressive)"
+  max_positions: "Maximum concurrent positions (1-10)"
+  min_sharpe: "Minimum Sharpe ratio (e.g. 1.5)"
+  min_win_rate: "Minimum win rate (e.g. 0.6)"
+  max_drawdown: "Maximum drawdown % (e.g. 0.15)"
+  volume_multiplier: "Volume surge multiplier (e.g. 2.0)"
+  correlation_window: "Correlation lookback periods (e.g. 30)"
+  zscore_threshold: "Z-score threshold (e.g. 2.0)"
+  num_assets: "Number of assets in universe"
+  max_weight: "Maximum single asset weight % (e.g. 15)"

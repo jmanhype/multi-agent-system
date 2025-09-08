@@ -1,0 +1,257 @@
+# GEPA Evolution Prompts for Strategy Mutation and Crossover
+
+# Base mutation prompt
+mutation_prompt: |
+  You are a genetic algorithm evolution specialist. Mutate the given trading strategy to improve performance.
+  
+  Original Strategy:
+  {original_strategy}
+  
+  Performance Metrics:
+  {performance_metrics}
+  
+  Mutation Type: {mutation_type}
+  
+  Apply the specified mutation while maintaining strategy validity. Focus on:
+  1. Parameter adjustment (±20% from original values)
+  2. Logical consistency (exit > entry thresholds for RSI)
+  3. Risk management preservation
+  4. Market regime alignment
+  
+  Return the mutated strategy as valid JSON only.
+
+# Parameter mutation prompts
+parameter_mutation:
+  small_adjustment: |
+    Apply SMALL parameter mutation to improve {weak_metric}:
+    - Adjust parameters by ±5-10% from current values
+    - Focus on {target_parameters}
+    - Maintain risk limits
+    - Preserve strategy logic
+    
+    Original: {original_strategy}
+    Target improvement: {improvement_target}
+  
+  medium_adjustment: |
+    Apply MEDIUM parameter mutation for {optimization_goal}:
+    - Adjust parameters by ±15-25% from current values
+    - Can modify 2-3 related parameters simultaneously  
+    - May change indicator periods or thresholds
+    - Keep risk management intact
+    
+    Weak areas to address: {weak_areas}
+    Performance baseline: {baseline_metrics}
+  
+  large_adjustment: |
+    Apply LARGE parameter mutation for major improvement:
+    - Adjust parameters by ±30-50% from current values
+    - Can change multiple parameter groups
+    - May alter strategy behavior significantly
+    - Must maintain valid parameter ranges
+    
+    Current issues: {performance_issues}
+    Target metrics: {target_metrics}
+
+# Strategy crossover prompts
+crossover_prompt: |
+  You are performing genetic crossover between two trading strategies.
+  Create an offspring strategy that combines the best features of both parents.
+  
+  Parent 1 (Performance: {parent1_fitness}):
+  {parent1_strategy}
+  
+  Parent 2 (Performance: {parent2_fitness}):  
+  {parent2_strategy}
+  
+  Crossover Type: {crossover_type}
+  
+  Combine strategies by:
+  1. Taking superior performing components from each parent
+  2. Ensuring parameter compatibility  
+  3. Maintaining logical consistency
+  4. Preserving risk management
+  
+  Return the offspring strategy as valid JSON.
+
+# Crossover type prompts
+crossover_types:
+  uniform_crossover: |
+    Perform UNIFORM crossover - randomly select each parameter from either parent:
+    - 50% probability of inheriting from each parent per parameter
+    - Ensure parameter combinations are logical
+    - Bias toward better-performing parent's parameters
+    
+  single_point_crossover: |
+    Perform SINGLE-POINT crossover - split strategies at one point:
+    - Take entry logic from Parent {better_parent}
+    - Take exit logic from Parent {other_parent}  
+    - Combine risk management optimally
+    - Ensure signal consistency
+    
+  blend_crossover: |
+    Perform BLEND crossover - average parameters from both parents:
+    - Blend numerical parameters: (p1 + p2) / 2
+    - Choose dominant parent for categorical parameters
+    - Apply ±10% random variation to blended values
+    
+  feature_crossover: |
+    Perform FEATURE-BASED crossover - combine best features:
+    - Take best entry method from {entry_winner}
+    - Take best exit method from {exit_winner}
+    - Take best risk management from {risk_winner}
+    - Ensure feature compatibility
+
+# Evaluation prompts
+strategy_evaluation: |
+  Evaluate the evolved strategy's fitness based on multiple criteria:
+  
+  Strategy: {strategy}
+  Backtest Results: {backtest_results}
+  Market Regime: {market_regime}
+  
+  Calculate fitness score considering:
+  1. Risk-adjusted returns (Sharpe ratio): {sharpe_weight}
+  2. Total returns: {return_weight}
+  3. Maximum drawdown penalty: {drawdown_weight}
+  4. Trade frequency balance: {frequency_weight}
+  5. Market regime adaptability: {adaptability_weight}
+  
+  Provide fitness score (0-100) and reasoning for the score.
+
+# Selection pressure prompts
+selection_prompt: |
+  Select the top {selection_count} strategies from the population for next generation:
+  
+  Population Fitness Scores:
+  {population_fitness}
+  
+  Selection Method: {selection_method}
+  Selection Pressure: {selection_pressure}
+  
+  Consider:
+  - Elite preservation (top {elite_count} strategies)
+  - Diversity maintenance (avoid genetic drift)
+  - Fitness proportionate selection
+  - Tournament selection among candidates
+  
+  Return selected strategy IDs and brief reasoning.
+
+# Diversity maintenance
+diversity_prompt: |
+  Maintain genetic diversity in the strategy population:
+  
+  Current Population: {population}
+  Diversity Metrics: {diversity_metrics}
+  Generation: {generation}
+  
+  Actions needed:
+  - Identify overly similar strategies (correlation > {similarity_threshold})
+  - Suggest diversity-increasing mutations
+  - Prevent premature convergence
+  - Introduce random exploration if needed
+  
+  Recommend specific actions to maintain healthy population diversity.
+
+# Adaptive mutation rates
+adaptive_mutation: |
+  Adjust mutation rates based on population progress:
+  
+  Generation: {generation}
+  Best Fitness Progress: {fitness_progress}
+  Population Diversity: {diversity_level}
+  Stagnation Periods: {stagnation_count}
+  
+  Current Mutation Rates:
+  - Parameter mutation: {param_rate}
+  - Structure mutation: {struct_rate}
+  - Crossover rate: {crossover_rate}
+  
+  Recommend mutation rate adjustments:
+  - Increase rates if stagnant (>5 generations no improvement)
+  - Decrease rates if converging too fast
+  - Balance exploration vs exploitation
+
+# Strategy complexity management
+complexity_prompt: |
+  Manage strategy complexity to prevent overfitting:
+  
+  Current Strategy: {strategy}
+  Complexity Score: {complexity_score}
+  Validation Performance: {validation_perf}
+  Training Performance: {training_perf}
+  
+  Complexity factors:
+  - Number of indicators: {num_indicators}
+  - Parameter count: {param_count}
+  - Rule complexity: {rule_complexity}
+  
+  Suggest simplification if overfitting detected:
+  - Remove redundant indicators
+  - Reduce parameter precision
+  - Simplify entry/exit logic
+  - Apply Occam's razor principle
+
+# Multi-objective optimization
+multi_objective_prompt: |
+  Optimize strategy for multiple conflicting objectives:
+  
+  Objectives:
+  1. Maximize returns: {return_target}
+  2. Minimize drawdown: {drawdown_limit}  
+  3. Minimize correlation: {correlation_limit}
+  4. Optimize trade frequency: {trade_frequency_target}
+  
+  Current Strategy Performance:
+  {current_performance}
+  
+  Use Pareto optimization approach:
+  - Identify non-dominated solutions
+  - Balance trade-offs between objectives
+  - Maintain solution diversity
+  - Provide efficient frontier options
+
+# Market regime adaptation
+regime_adaptation: |
+  Adapt strategy for different market regimes:
+  
+  Strategy: {strategy}
+  Current Regime: {current_regime}
+  Regime History: {regime_history}
+  
+  Performance by Regime:
+  {regime_performance}
+  
+  Adaptation suggestions:
+  - Parameters to adjust for {target_regime}
+  - Regime detection improvements
+  - Dynamic parameter adjustment
+  - Multi-regime optimization
+
+# Template variables
+template_vars:
+  mutation_types:
+    - "parameter_adjustment"
+    - "threshold_optimization"  
+    - "indicator_substitution"
+    - "logic_modification"
+    - "risk_adjustment"
+  
+  crossover_types:
+    - "uniform_crossover"
+    - "single_point_crossover"
+    - "blend_crossover" 
+    - "feature_crossover"
+    
+  selection_methods:
+    - "tournament_selection"
+    - "roulette_wheel"
+    - "rank_selection"
+    - "elitist_selection"
+    
+  fitness_components:
+    - "total_return"
+    - "sharpe_ratio"
+    - "max_drawdown"
+    - "win_rate"
+    - "profit_factor"
+    - "trade_frequency"
