@@ -1,0 +1,28 @@
+# Data and logs
+data/
+logs/
+db/
+artifacts/candidates/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+
+# IDE
+.vscode/
+.idea/
+
+# Security
+.guard_pin
+.env
+*.key
+*.pem
+
+# OS
+.DS_Store
+Thumbs.db

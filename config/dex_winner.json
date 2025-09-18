@@ -1,0 +1,58 @@
+{
+  "id": "dex_adapted_winner",
+  "universe": [
+    "POPCAT"
+  ],
+  "timeframes": [
+    "5m"
+  ],
+  "regime": {
+    "type": "ema_cross",
+    "fast": 10,
+    "slow": 58,
+    "direction": "up"
+  },
+  "entry": {
+    "type": "rsi",
+    "op": "below",
+    "threshold": 27
+  },
+  "exit": {
+    "type": "rsi",
+    "op": "above",
+    "threshold": 58
+  },
+  "risk": {
+    "tp": 0.0722576337714539,
+    "sl": 0.042335733253338684,
+    "max_orders": 1,
+    "atr_cap_pct": 0.03
+  },
+  "execution": {
+    "order_type": "market",
+    "fees": {
+      "maker_bps": 1.0,
+      "taker_bps": 4.0
+    },
+    "slippage": {
+      "model": "impact",
+      "k": 1.2
+    },
+    "latency_ms": 250,
+    "lot": {
+      "min_qty": 0.0001,
+      "tick": 0.1
+    }
+  },
+  "data_source": {
+    "type": "pickle",
+    "path": "data/models/big_optimize_1016.pkl",
+    "adapter": "dex"
+  },
+  "metrics": {
+    "sharpe_ratio": 3.8044228123458717,
+    "win_rate": 0.7274939598725445,
+    "avg_return": 0.003763320878075174,
+    "num_trades": 57118
+  }
+}

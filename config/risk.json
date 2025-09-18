@@ -1,0 +1,44 @@
+{
+  "max_position_size": 62.50,
+  "max_daily_loss_usd": 100,
+  "max_drawdown_percent": 5.0,
+  "max_consecutive_losses": 3,
+  "per_trade_risk_percent": 2.0,
+  "max_leverage": 3.0,
+  "symbol_whitelist": ["BTC/USDT", "ETH/USDT"],
+  "correlation_settings": {
+    "max_correlation": 0.7,
+    "correlation_window_days": 30,
+    "min_correlation_observations": 20
+  },
+  "position_sizing": {
+    "kelly_fraction_safety": 0.25,
+    "volatility_adjustment": true,
+    "target_volatility": 0.15,
+    "concentration_limit_percent": 25.0,
+    "atr_multiplier": 2.0
+  },
+  "circuit_breakers": {
+    "daily_loss_usd": -100,
+    "drawdown_percent": 10.0,
+    "latency_ms": 1000,
+    "error_rate_percent": 5.0,
+    "consecutive_errors": 3,
+    "rapid_loss_velocity_factor": 0.5
+  },
+  "trading_hours": {
+    "restricted_hours_utc": [3, 4, 5, 6],
+    "low_liquidity_multiplier": 0.5
+  },
+  "emergency_procedures": {
+    "auto_liquidate_on_critical": false,
+    "position_reduction_factor": 0.5,
+    "recovery_wait_minutes": 15
+  },
+  "performance_targets": {
+    "min_sharpe_ratio": 1.0,
+    "max_acceptable_drawdown": 0.15,
+    "target_win_rate": 0.55,
+    "min_profit_factor": 1.2
+  }
+}

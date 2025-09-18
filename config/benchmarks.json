@@ -1,0 +1,63 @@
+{
+  "name": "Kagen's Autonomous Portfolio Optimizer Benchmarks",
+  "version": "2.0.0",
+  "target_metrics": {
+    "min_total_return": 1.0,
+    "min_trades": 1000,
+    "min_assets_traded": 50,
+    "min_sharpe": 2.0,
+    "max_drawdown": 0.30,
+    "min_win_rate": 0.55,
+    "min_profit_factor": 1.8,
+    "min_sortino": 2.5
+  },
+  "portfolio_requirements": {
+    "total_assets_available": 65,
+    "min_portfolio_diversification": 0.8,
+    "max_single_asset_weight": 0.15,
+    "max_correlation_exposure": 0.7,
+    "min_daily_volume_usd": 10000
+  },
+  "operational_requirements": {
+    "uptime_requirement": 0.995,
+    "max_system_downtime_minutes": 30,
+    "data_freshness_minutes": 5,
+    "execution_latency_ms": 1000,
+    "backup_system_available": true
+  },
+  "risk_management": {
+    "var_95_daily_limit": 0.05,
+    "max_leverage": 1.0,
+    "circuit_breaker_levels": [0.10, 0.20, 0.30],
+    "stress_test_scenarios": ["flash_crash", "correlation_spike", "liquidity_crisis"],
+    "recovery_time_hours": 24
+  },
+  "continuous_operation": {
+    "autonomous_runtime_hours": 8760,
+    "auto_restart_failures": true,
+    "memory_cleanup_interval": 1800,
+    "log_retention_days": 30,
+    "performance_monitoring": true
+  },
+  "validation_rules": {
+    "backtest_period_months": 6,
+    "out_of_sample_ratio": 0.3,
+    "monte_carlo_runs": 1000,
+    "walk_forward_windows": 12,
+    "statistical_significance": 0.05
+  },
+  "promotion_criteria": {
+    "all_targets_must_pass": true,
+    "consecutive_success_days": 7,
+    "peer_review_required": false,
+    "stress_test_pass_rate": 0.8,
+    "robustness_score": 0.7
+  },
+  "reporting_requirements": {
+    "daily_performance_report": true,
+    "weekly_risk_report": true,
+    "monthly_strategy_review": true,
+    "quarterly_system_audit": true,
+    "real_time_dashboard": true
+  }
+}

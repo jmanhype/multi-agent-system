@@ -1,0 +1,294 @@
+# Risk Assessment and Management Prompts
+
+# Portfolio risk analysis
+portfolio_risk_analysis: |
+  Analyze portfolio-wide risk for {num_assets} Solana meme coin strategies:
+  
+  Portfolio Composition:
+  {portfolio_composition}
+  
+  Individual Asset Metrics:
+  {asset_metrics}
+  
+  Correlation Matrix:
+  {correlation_matrix}
+  
+  Assess the following risks:
+  1. Concentration Risk - Are too many assets correlated?
+  2. Liquidity Risk - Can we exit positions quickly?
+  3. Volatility Risk - Is overall portfolio volatility manageable?
+  4. Drawdown Risk - What's maximum potential loss?
+  5. Tail Risk - Black swan event impact
+  
+  Provide specific risk scores (1-10) and mitigation strategies.
+
+# Position sizing optimization
+position_sizing: |
+  Calculate optimal position sizes using Kelly Criterion and risk parity:
+  
+  Asset: {symbol}
+  Strategy Performance:
+  - Win Rate: {win_rate}
+  - Average Win: {avg_win}%
+  - Average Loss: {avg_loss}%
+  - Sharpe Ratio: {sharpe_ratio}
+  
+  Portfolio Context:
+  - Total Capital: ${total_capital}
+  - Current Positions: {current_positions}
+  - Available Cash: ${available_cash}
+  - Risk Budget: {risk_budget}%
+  
+  Calculate:
+  1. Kelly optimal fraction
+  2. Risk parity weight  
+  3. Maximum drawdown constraint
+  4. Final recommended position size
+  
+  Consider correlation with existing positions.
+
+# Risk monitoring alerts
+risk_monitoring: |
+  Generate risk alerts for current portfolio state:
+  
+  Real-time Metrics:
+  - Portfolio Value: ${portfolio_value}
+  - Daily P&L: {daily_pnl}%
+  - Current Drawdown: {current_drawdown}%
+  - Open Positions: {open_positions}
+  - Margin Usage: {margin_usage}%
+  
+  Risk Thresholds:
+  - Max Daily Loss: {max_daily_loss}%
+  - Max Drawdown: {max_drawdown_limit}%
+  - Max Positions: {max_positions}
+  - Max Margin: {max_margin}%
+  - Correlation Limit: {correlation_limit}
+  
+  Generate specific alerts if any thresholds are breached:
+  - Severity: LOW/MEDIUM/HIGH/CRITICAL
+  - Action Required: Description of immediate actions
+  - Time Sensitivity: How quickly action is needed
+
+# Stress testing scenarios
+stress_testing: |
+  Perform stress testing on portfolio under extreme scenarios:
+  
+  Current Portfolio: {portfolio_summary}
+  
+  Stress Scenarios:
+  1. Flash Crash: -50% across all assets in 1 hour
+  2. Correlation Breakdown: All correlations → 1.0
+  3. Liquidity Crisis: Volume drops 90% for 24h
+  4. Volatility Spike: ATR doubles across all assets
+  5. Black Swan: Largest position drops 80%
+  
+  For each scenario, calculate:
+  - Portfolio impact (P&L)
+  - Margin call risk
+  - Liquidation thresholds
+  - Recovery time estimates
+  - Mitigation effectiveness
+  
+  Provide stress test summary with risk ratings.
+
+# Dynamic risk adjustment
+dynamic_risk_adjustment: |
+  Adjust risk parameters based on market conditions:
+  
+  Market Regime: {market_regime}
+  Volatility Environment: {volatility_level}
+  Recent Performance: {recent_performance}
+  
+  Current Risk Settings:
+  - Position Size: {current_position_size}%
+  - Stop Loss: {current_stop_loss}%
+  - Max Positions: {current_max_positions}
+  - Correlation Limit: {current_correlation_limit}
+  
+  Market Indicators:
+  - VIX Level: {vix_level}
+  - Correlation Trend: {correlation_trend}
+  - Volume Pattern: {volume_pattern}
+  
+  Recommend risk parameter adjustments:
+  1. Position sizing adjustments
+  2. Stop loss modifications  
+  3. Correlation limit changes
+  4. Exposure modifications
+  5. Hedge recommendations
+
+# Risk budgeting allocation
+risk_budgeting: |
+  Allocate risk budget across {num_strategies} strategies:
+  
+  Total Risk Budget: {total_risk_budget}% (of portfolio)
+  
+  Strategy Risk Profiles:
+  {strategy_risk_profiles}
+  
+  Allocation Constraints:
+  - No single strategy > {max_strategy_risk}% risk
+  - Minimum {min_strategies} strategies active
+  - Reserve {reserve_risk}% for opportunistic trades
+  - Correlation limit: {max_correlation}
+  
+  Calculate optimal risk allocation:
+  1. Risk-adjusted return weighting
+  2. Diversification benefits
+  3. Capacity constraints
+  4. Market regime sensitivity
+  
+  Provide allocation table with reasoning.
+
+# Correlation risk management
+correlation_risk: |
+  Manage correlation risk across portfolio positions:
+  
+  Current Correlations:
+  {correlation_matrix}
+  
+  High Risk Pairs (correlation > 0.8):
+  {high_correlation_pairs}
+  
+  Position Sizes:
+  {position_sizes}
+  
+  Risk Concentration Issues:
+  1. Identify over-correlated clusters
+  2. Calculate risk concentration by cluster
+  3. Estimate portfolio diversification ratio
+  4. Flag positions for reduction/hedging
+  
+  Recommendations:
+  - Position adjustments needed
+  - Hedge requirements
+  - Diversification opportunities
+  - Correlation monitoring alerts
+
+# Liquidity risk assessment
+liquidity_risk: |
+  Assess liquidity risk for portfolio positions:
+  
+  Current Positions:
+  {current_positions}
+  
+  Liquidity Metrics by Asset:
+  {liquidity_metrics}
+  
+  Market Conditions:
+  - Overall volume trend: {volume_trend}
+  - Bid-ask spreads: {spread_analysis}
+  - Market depth: {market_depth}
+  - Recent liquidity events: {liquidity_events}
+  
+  Liquidity Risk Assessment:
+  1. Position-to-volume ratios
+  2. Expected execution slippage
+  3. Time to liquidate estimates
+  4. Emergency exit scenarios
+  
+  Provide liquidity risk score and exit strategy recommendations.
+
+# Value at Risk (VaR) calculation
+var_calculation: |
+  Calculate portfolio Value at Risk metrics:
+  
+  Portfolio Returns History:
+  {returns_history}
+  
+  Current Positions:
+  {positions}
+  
+  Calculate VaR measures:
+  1. 1-day 95% VaR (historical simulation)
+  2. 1-day 99% VaR (parametric method)
+  3. Expected Shortfall (CVaR) at 95%
+  4. Maximum expected loss (worst case)
+  
+  Time Horizons: 1-day, 1-week, 1-month
+  
+  Include:
+  - Confidence intervals
+  - Model assumptions
+  - Backtesting validation
+  - Scenario analysis integration
+
+# Risk-adjusted performance
+risk_adjusted_performance: |
+  Evaluate risk-adjusted performance metrics:
+  
+  Strategy Performance:
+  {strategy_performance}
+  
+  Benchmark Comparisons:
+  - Risk-free rate: {risk_free_rate}%
+  - Market benchmark: {market_benchmark}
+  - Peer strategies: {peer_benchmarks}
+  
+  Calculate comprehensive metrics:
+  1. Sharpe Ratio (risk-adjusted returns)
+  2. Sortino Ratio (downside deviation)
+  3. Calmar Ratio (return/max drawdown)
+  4. Information Ratio (vs benchmark)
+  5. Treynor Ratio (systematic risk)
+  6. Jensen's Alpha (risk-adjusted excess return)
+  
+  Provide performance attribution and improvement suggestions.
+
+# Circuit breaker conditions
+circuit_breaker_conditions: |
+  Define circuit breaker triggers for automated risk management:
+  
+  Current System State:
+  {system_state}
+  
+  Circuit Breaker Levels:
+  
+  Level 1 (WARNING):
+  - Daily loss > {level1_loss_threshold}%
+  - Drawdown > {level1_drawdown_threshold}%
+  - Correlation spike > {level1_correlation_threshold}
+  - Action: Reduce new position sizes by 50%
+  
+  Level 2 (CAUTION):  
+  - Daily loss > {level2_loss_threshold}%
+  - Drawdown > {level2_drawdown_threshold}%
+  - Multiple position stops triggered
+  - Action: Halt new positions, review existing
+  
+  Level 3 (EMERGENCY):
+  - Daily loss > {level3_loss_threshold}%  
+  - System errors/connectivity issues
+  - Extreme market conditions detected
+  - Action: Emergency position liquidation
+  
+  Define specific trigger conditions and automated responses.
+
+# Risk reporting template
+risk_report_template: |
+  Generate daily/weekly risk report:
+  
+  Report Period: {report_period}
+  Portfolio Summary: {portfolio_summary}
+  
+  Executive Summary:
+  - Overall risk level: {risk_level}/10
+  - Key risks identified: {key_risks}
+  - Actions taken: {actions_taken}
+  - Recommendations: {recommendations}
+  
+  Detailed Analysis:
+  1. Performance vs Risk Budget
+  2. Correlation Analysis  
+  3. Liquidity Assessment
+  4. VaR and Stress Test Results
+  5. Compliance Status
+  6. Market Risk Factors
+  
+  Actionable Items:
+  - Immediate actions required
+  - Medium-term adjustments
+  - Long-term risk framework improvements
+  
+  Include charts, tables, and quantitative evidence.
