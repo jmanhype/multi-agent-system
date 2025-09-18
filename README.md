@@ -276,6 +276,112 @@ MIT - See LICENSE file
 - VectorBT Pro for backtesting engine
 - Claude-Flow v2.0.0 Alpha for multi-agent orchestration capabilities
 
+## 📚 Resources
+
+### Project Resources
+- [Repository](https://github.com/jmanhype/multi-agent-system)
+- [Issues](https://github.com/jmanhype/multi-agent-system/issues)
+
+### Claude-Flow Resources
+- [Claude-Flow v2.0.0 Alpha](https://github.com/ruvnet/claude-flow)
+- [Claude-Flow Wiki](https://github.com/ruvnet/claude-flow/wiki)
+- [Installation Guide](https://github.com/ruvnet/claude-flow/wiki/Installation-Guide)
+- [Agent System Overview](https://github.com/ruvnet/claude-flow/wiki/Agent-System-Overview)
+
+## 🤖 Complete Agent Catalog
+
+Looking at the Claude Code configuration, we have 54 specialized agents available. Here they are organized by category:
+
+### Core Development Agents
+- **coder** - Implementation specialist
+- **reviewer** - Code review and quality assurance
+- **tester** - Comprehensive testing specialist
+- **planner** - Strategic planning and task orchestration
+- **researcher** - Deep research and information gathering
+
+### Swarm Coordination Agents
+- **hierarchical-coordinator** - Queen-led hierarchical coordination
+- **mesh-coordinator** - Peer-to-peer mesh network swarm
+- **adaptive-coordinator** - Dynamic topology switching with self-organizing patterns
+- **swarm-init** - Swarm initialization and topology optimization
+- **smart-agent** - Intelligent agent coordination and dynamic spawning
+
+### GitHub & Repository Management
+- **github-modes** - Comprehensive GitHub integration modes
+- **pr-manager** - Pull request management with swarm coordination
+- **code-review-swarm** - Deploy specialized AI agents for code reviews
+- **issue-tracker** - Intelligent issue management and project coordination
+- **release-manager** - Automated release coordination and deployment
+- **release-swarm** - Orchestrate complex software releases
+- **workflow-automation** - GitHub Actions workflow automation
+- **project-board-sync** - Synchronize AI swarms with GitHub Projects
+- **repo-architect** - Repository structure optimization
+- **multi-repo-swarm** - Cross-repository swarm orchestration
+- **sync-coordinator** - Multi-repository synchronization
+- **swarm-pr** - Pull request swarm management
+- **swarm-issue** - GitHub issue-based swarm coordination
+
+### Consensus & Distributed Systems
+- **byzantine-coordinator** - Byzantine fault-tolerant consensus protocols
+- **raft-manager** - Raft consensus algorithm management
+- **gossip-coordinator** - Gossip-based consensus protocols
+- **crdt-synchronizer** - Conflict-free Replicated Data Types
+- **quorum-manager** - Dynamic quorum adjustment
+- **security-manager** - Comprehensive security mechanisms
+
+### Performance & Optimization
+- **perf-analyzer** - Performance bottleneck analyzer
+- **performance-benchmarker** - Comprehensive performance benchmarking
+- **task-orchestrator** - Central coordination for task decomposition
+- **memory-coordinator** - Manage persistent memory across sessions
+
+### SPARC Methodology Agents
+- **sparc-coord** - SPARC methodology orchestrator
+- **sparc-coder** - Transform specifications into working code with TDD
+- **specification** - SPARC Specification phase specialist
+- **pseudocode** - SPARC Pseudocode phase specialist
+- **architecture** - SPARC Architecture phase specialist
+- **refinement** - SPARC Refinement phase specialist
+
+### Specialized Development
+- **backend-dev** - Backend API development specialist
+- **mobile-dev** - React Native mobile application development
+- **cicd-engineer** - GitHub Actions CI/CD pipeline creation
+- **api-docs** - OpenAPI/Swagger documentation expert
+- **system-architect** - System architecture design and patterns
+- **code-analyzer** - Advanced code quality analysis
+- **base-template-generator** - Create foundational templates
+- **production-validator** - Ensure applications are deployment-ready
+- **classdojo-mobile-automation** - Mobile automation specialist
+
+### Testing Specialists
+- **tdd-london-swarm** - TDD London School specialist
+- **production-validator** - Production validation specialist
+
+### Migration & Planning
+- **migration-planner** - Comprehensive migration planning
+
+### How to Use Agents
+
+You spawn these agents using Claude Code's Task tool:
+
+```javascript
+// Example: Spawn multiple agents for a full-stack feature
+Task("Backend API", "Build REST endpoints with authentication", "backend-dev")
+Task("Frontend UI", "Create React components for user dashboard", "coder")
+Task("Mobile App", "Implement React Native screens", "mobile-dev")
+Task("API Docs", "Generate OpenAPI documentation", "api-docs")
+Task("Testing", "Write comprehensive test suite", "tester")
+Task("Review", "Review code quality and security", "reviewer")
+```
+
+Each agent is specialized for specific tasks and can coordinate with others through hooks and memory systems. The agents run concurrently when spawned in the same message, maximizing efficiency.
+
+### Claude Code Resources
+- [Claude Code Official](https://claude.ai/code)
+- [Claude Code Docs](https://docs.anthropic.com/en/docs/claude-code/overview)
+- [Claude Developers Discord](https://discord.gg/claude-dev)
+
 ---
 
 **Note**: This is a research system. Always validate strategies thoroughly before live trading. The system is designed for safety-first operation with multiple validation gates.
