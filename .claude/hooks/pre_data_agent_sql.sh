@@ -45,8 +45,8 @@ for pattern in "${SYSTEM_PATTERNS[@]}"; do
   fi
 done
 
-# Validate parameterized queries (basic check)
-if echo "$QUERY" | grep -q "'[^']*;"; then
+# Validate parameterized queries (enhanced injection detection)
+if echo "$QUERY" | grep -Eq "'\s*;\s*.*(--|#|/\*)?"; then
   echo "WARNING: Potential SQL injection risk detected"
   echo "Policy: Use parameterized queries only"
   exit 1

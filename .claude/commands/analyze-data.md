@@ -7,7 +7,7 @@ Execute DataAgent analysis workflow for: $ARGUMENTS
 
 **Safety Pre-Flight:**
 1. Validate request against safety policies:
-   - No DDL/DML operations (CREATE, DROP, ALTER, DELETE, UPDATE, INSERT, TRUNCATE)
+   - No DDL/DML operations (CREATE, DROP, ALTER, DELETE, UPDATE, INSERT, TRUNCATE, MERGE)
    - No system table access (pg_*, information_schema.*)
    - No PII exposure without explicit masking
    - Row limit: 10,000 per query

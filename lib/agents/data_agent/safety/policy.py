@@ -77,7 +77,7 @@ class SQLPolicyChecker:
             violations.append("SQL comment detected (potential injection)")
             severity = max(severity, "high", key=lambda x: ["none", "low", "medium", "high", "critical"].index(x))
         
-        if ';' in query and query.count(';') > 1:
+        if ';' in query.strip().rstrip(';'):
             violations.append("Multiple statements detected (potential injection)")
             severity = max(severity, "high", key=lambda x: ["none", "low", "medium", "high", "critical"].index(x))
         

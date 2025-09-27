@@ -85,9 +85,9 @@ class Plotter:
         
         try:
             if backend == "matplotlib":
-                return self._matplotlib_line_chart(df, x, y, title, **kwargs)
+                return self._matplotlib_line_chart(df, x, y, title, start_time, **kwargs)
             elif backend == "plotly":
-                return self._plotly_line_chart(df, x, y, title, **kwargs)
+                return self._plotly_line_chart(df, x, y, title, start_time, **kwargs)
             else:
                 raise PlotGenerationError(
                     f"Unsupported backend: {backend}",
@@ -126,9 +126,9 @@ class Plotter:
         
         try:
             if backend == "matplotlib":
-                return self._matplotlib_bar_chart(df, x, y, title, **kwargs)
+                return self._matplotlib_bar_chart(df, x, y, title, start_time, **kwargs)
             elif backend == "plotly":
-                return self._plotly_bar_chart(df, x, y, title, **kwargs)
+                return self._plotly_bar_chart(df, x, y, title, start_time, **kwargs)
             else:
                 raise PlotGenerationError(
                     f"Unsupported backend: {backend}",
@@ -207,10 +207,10 @@ class Plotter:
         x: str,
         y: Union[str, List[str]],
         title: Optional[str],
+        start_time: float,
         **kwargs: Any,
     ) -> PlotResult:
         """Generate matplotlib line chart."""
-        start_time = time.time()
         
         fig, ax = plt.subplots(figsize=(10, 6))
         
@@ -234,10 +234,10 @@ class Plotter:
         x: str,
         y: Union[str, List[str]],
         title: Optional[str],
+        start_time: float,
         **kwargs: Any,
     ) -> PlotResult:
         """Generate plotly line chart."""
-        start_time = time.time()
         
         y_cols = [y] if isinstance(y, str) else y
         fig = go.Figure()
@@ -259,10 +259,10 @@ class Plotter:
         x: str,
         y: str,
         title: Optional[str],
+        start_time: float,
         **kwargs: Any,
     ) -> PlotResult:
         """Generate matplotlib bar chart."""
-        start_time = time.time()
         
         fig, ax = plt.subplots(figsize=(10, 6))
         ax.bar(df[x], df[y], **kwargs)
@@ -281,10 +281,10 @@ class Plotter:
         x: str,
         y: str,
         title: Optional[str],
+        start_time: float,
         **kwargs: Any,
     ) -> PlotResult:
         """Generate plotly bar chart."""
-        start_time = time.time()
         
         fig = px.bar(df, x=x, y=y, title=title, **kwargs)
         

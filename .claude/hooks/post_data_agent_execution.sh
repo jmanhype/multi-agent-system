@@ -38,7 +38,7 @@ PAYLOAD=$(jq -n \
   }')
 
 # Compute Merkle hash (SHA256 of payload + prev_hash)
-CURRENT_HASH=$(echo "$PAYLOAD" | sha256sum | awk '{print $1}')
+CURRENT_HASH=$(echo "${PAYLOAD}${PREV_HASH}" | sha256sum | awk '{print $1}')
 
 # Append entry with Merkle hash
 AUDIT_ENTRY=$(echo "$PAYLOAD" | jq --arg hash "$CURRENT_HASH" '. + {merkle_hash: $hash}')
