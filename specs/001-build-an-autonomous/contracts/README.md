@@ -177,7 +177,7 @@ pip install jsonschema
 python -c "
 import json, jsonschema
 schema = json.load(open('specs/001-build-an-autonomous/contracts/request.json'))
-example = json.load(open('specs/001-build-an-autonomous/contracts/request.json'))['examples'][0]
+example = schema['examples'][0]
 jsonschema.validate(instance=example, schema=schema)
 print('✅ Schema valid')
 "
