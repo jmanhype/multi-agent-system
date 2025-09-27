@@ -8,6 +8,8 @@ from typing import Any, Dict, List, Optional
 import pandas as pd
 import numpy as np
 
+from ..memory.schema_fingerprint import SchemaFingerprinter
+
 
 @dataclass
 class ColumnProfile:
@@ -245,15 +247,5 @@ class DataProfiler:
         Returns:
             SHA256 hash of sorted column names and types
         """
-        import hashlib
-        
-        schema_items = []
-        for col in sorted(df.columns):
-            dtype = str(df[col].dtype)
-            schema_items.append(f"{col}:{dtype}")
-        
-        schema_str = ",".join(schema_items)
-        
-        fingerprint = hashlib.sha256(schema_str.encode()).hexdigest()
-        
-        return fingerprint
+        fingerprinter = SchemaFingerprinter(normalize_types=True)
+        return fingerprinter.compute_fingerprint_from_dataframe(df)
