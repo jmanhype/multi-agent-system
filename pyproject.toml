@@ -3,7 +3,7 @@ name = "gepa-trading-system"
 version = "0.1.0"
 description = "Multi-agent trading system with GEPA optimization and Three Gulfs Framework"
 readme = "README.md"
-requires-python = ">=3.10,<3.11"
+requires-python = ">=3.11"
 license = {text = "MIT"}
 authors = [
     {name = "GEPA Trading Team"},
@@ -22,6 +22,13 @@ dependencies = [
     "sqlalchemy>=2.0.0",
     "fastapi>=0.100.0",
     "uvicorn>=0.23.0",
+    "pydantic>=2.5.0",
+    "psycopg[binary]>=3.1.0",
+    "matplotlib>=3.8.0",
+    "plotly>=5.18.0",
+    "anthropic>=0.8.0",
+    "jsonschema>=4.20.0",
+    "sentence-transformers>=2.2.0",
 ]
 
 [project.optional-dependencies]
@@ -29,7 +36,9 @@ dev = [
     "black>=23.0.0",
     "ruff>=0.1.0",
     "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
     "pytest-cov>=4.0.0",
+    "mypy>=1.7.0",
     "ipython>=8.0.0",
 ]
 
@@ -51,12 +60,12 @@ build-backend = "hatchling.build"
 
 [tool.black]
 line-length = 100
-target-version = ['py310']
+target-version = ['py311']
 include = '\.pyi?$'
 
 [tool.ruff]
 line-length = 100
-target-version = "py310"
+target-version = "py311"
 select = [
     "E",  # pycodestyle errors
     "W",  # pycodestyle warnings
@@ -78,7 +87,16 @@ ignore = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
+python_classes = "Test*"
+python_functions = "test_*"
+asyncio_mode = "auto"
 addopts = "-v --cov=lib --cov-report=term-missing"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
 
 [tool.uv]
 index-url = "https://pypi.org/simple"
@@ -86,4 +104,3 @@ extra-index-url = ["https://jmanhype:${FURY_TOKEN}@pypi.fury.io/vectorbt/simple/
 
 [tool.uv.pip]
 system = false
-compile = true

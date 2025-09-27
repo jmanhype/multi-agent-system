@@ -1,0 +1,137 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AnalysisRequest",
+  "description": "User's natural language data analysis request with data sources, constraints, and deliverables (per FR-038, FR-039)",
+  "type": "object",
+  "required": ["request_id", "intent", "data_sources", "deliverables"],
+  "properties": {
+    "request_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier for this analysis request"
+    },
+    "intent": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000,
+      "description": "Natural language description of analysis (e.g., 'Analyze Q1 2021 Arizona sales; trends + charts')",
+      "examples": [
+        "Analyze Q1 2021 Arizona sales; trends + charts",
+        "Show me top 10 customers by revenue in last 30 days",
+        "Compare monthly active users across regions"
+      ]
+    },
+    "data_sources": {
+      "type": "array",
+      "minItems": 1,
+      "description": "List of data sources to query (FR-012, FR-013, FR-014)",
+      "items": {
+        "type": "object",
+        "required": ["type"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["sql", "csv", "json"],
+            "description": "Data source type"
+          },
+          "connection_string": {
+            "type": "string",
+            "description": "For SQL databases (e.g., 'postgresql://user:pass@host:5432/db')"
+          },
+          "file_path": {
+            "type": "string",
+            "description": "For file-based sources (absolute path or URI)"
+          },
+          "schema_fingerprint": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$",
+            "description": "SHA256 hash of schema (sorted column names + types) for recipe retrieval"
+          }
+        },
+        "oneOf": [
+          {
+            "properties": { "type": { "const": "sql" } },
+            "required": ["connection_string"]
+          },
+          {
+            "properties": { "type": { "enum": ["csv", "json"] } },
+            "required": ["file_path"]
+          }
+        ]
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "description": "Execution limits and safety bounds",
+      "properties": {
+        "row_limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200000,
+          "default": 200000,
+          "description": "Maximum rows per query (FR-022)"
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 180,
+          "default": 30,
+          "description": "Maximum time for entire analysis (FR-023, FR-043)"
+        }
+      }
+    },
+    "deliverables": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "description": "Requested output types (FR-005)",
+      "items": {
+        "type": "string",
+        "enum": ["tables", "charts", "reports", "summary"]
+      },
+      "examples": [
+        ["tables", "charts"],
+        ["summary"],
+        ["tables", "charts", "reports", "summary"]
+      ]
+    },
+    "policy": {
+      "type": "object",
+      "description": "Safety and access control rules",
+      "properties": {
+        "allowed_columns": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Whitelist of columns (if specified, only these can be accessed) - FR-019"
+        },
+        "blocked_patterns": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": ["ssn", "social_security", "email", "phone", "credit_card"],
+          "description": "PII patterns to reject in queries (FR-020)"
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "request_id": "550e8400-e29b-41d4-a716-446655440000",
+      "intent": "Analyze Q1 2021 Arizona sales; trends + charts",
+      "data_sources": [
+        {
+          "type": "sql",
+          "connection_string": "postgresql://user:pass@localhost:5432/sales",
+          "schema_fingerprint": "a3f5b8c9e7d2f1a4b6c8e0d3f5a7b9c1e3d5f7a9b1c3e5d7f9a1b3c5e7d9f1a3"
+        }
+      ],
+      "constraints": {
+        "row_limit": 100000,
+        "timeout_seconds": 30
+      },
+      "deliverables": ["tables", "charts", "summary"],
+      "policy": {
+        "blocked_patterns": ["ssn", "email"]
+      }
+    }
+  ]
+}
