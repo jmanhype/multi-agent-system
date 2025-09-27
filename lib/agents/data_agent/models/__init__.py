@@ -1,0 +1,1 @@
+"""Entity models for DataAgent internal state."""

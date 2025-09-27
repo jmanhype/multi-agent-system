@@ -1,0 +1,249 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AnalysisResponse",
+  "description": "DataAgent response with artifacts, summary, metrics, and audit references (per FR-038, FR-040)",
+  "type": "object",
+  "required": ["request_id", "status", "artifacts", "summary", "metrics", "audit_log_ref"],
+  "properties": {
+    "request_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Foreign key to AnalysisRequest"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["completed", "failed", "partial_success"],
+      "description": "Overall analysis outcome"
+    },
+    "artifacts": {
+      "type": "array",
+      "description": "Generated outputs (tables, charts, reports) - FR-005",
+      "items": {
+        "type": "object",
+        "required": ["artifact_id", "artifact_type", "content_ref", "content_hash"],
+        "properties": {
+          "artifact_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for this artifact"
+          },
+          "artifact_type": {
+            "type": "string",
+            "enum": ["table", "chart", "report", "summary"],
+            "description": "Type of artifact generated"
+          },
+          "content_ref": {
+            "type": "string",
+            "description": "File path or URI to artifact content"
+          },
+          "content_hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$",
+            "description": "SHA256 hash of artifact for audit trail (FR-036)"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Type-specific metadata",
+            "properties": {
+              "row_count": { "type": "integer", "description": "For tables" },
+              "column_names": { "type": "array", "items": { "type": "string" }, "description": "For tables" },
+              "chart_type": { "type": "string", "description": "For charts (line, bar, scatter, etc.)" },
+              "x_label": { "type": "string", "description": "For charts" },
+              "y_label": { "type": "string", "description": "For charts" },
+              "format": { "type": "string", "description": "For reports (markdown, html, pdf)" },
+              "section_count": { "type": "integer", "description": "For reports" }
+            }
+          },
+          "size_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Artifact file size"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp of artifact generation"
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": ["key_findings", "insights"],
+      "description": "High-level analysis summary (FR-005)",
+      "properties": {
+        "key_findings": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Bullet points of main discoveries",
+          "examples": [
+            ["Q1 2021 Arizona sales totaled $1.2M", "March showed 15% growth over January"]
+          ]
+        },
+        "insights": {
+          "type": "string",
+          "description": "Narrative summary of analysis",
+          "examples": [
+            "Sales in Arizona showed steady quarter-over-quarter growth, driven primarily by increased demand in the Phoenix metro area."
+          ]
+        },
+        "warnings": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Data quality issues or analysis limitations",
+          "examples": [
+            ["10% of records had missing state field", "Results truncated to 200k rows"]
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "required": ["execution_time_seconds", "tool_calls_count"],
+      "description": "Performance and execution statistics",
+      "properties": {
+        "execution_time_seconds": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Total analysis duration (FR-043: target <30s)"
+        },
+        "tool_calls_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of tool invocations (initial + retries)"
+        },
+        "retries_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 6,
+          "description": "Number of self-repair attempts (FR-030: max K=3 per tool call)"
+        },
+        "rows_processed": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total data rows analyzed across all operations"
+        },
+        "recipe_used": {
+          "type": "boolean",
+          "description": "Whether a stored recipe was retrieved and adapted (FR-033)"
+        }
+      }
+    },
+    "audit_log_ref": {
+      "type": "string",
+      "description": "Path or URI to Merkle-chained audit log for this analysis (FR-034, FR-035)",
+      "examples": ["logs/data_agent_runs.jsonl#550e8400"]
+    },
+    "plan_ref": {
+      "type": "string",
+      "description": "Plan ID for traceability",
+      "format": "uuid"
+    },
+    "error": {
+      "type": "object",
+      "description": "Populated if status='failed' or 'partial_success'",
+      "properties": {
+        "error_type": {
+          "type": "string",
+          "enum": ["timeout", "resource_limit", "policy_violation", "grounding_error", "tool_failure"],
+          "description": "High-level error category"
+        },
+        "error_message": {
+          "type": "string",
+          "description": "Human-readable error description"
+        },
+        "failed_tool_calls": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "call_id": { "type": "string", "format": "uuid" },
+              "tool_name": { "type": "string" },
+              "error_category": {
+                "type": "string",
+                "enum": ["sql_syntax", "type_mismatch", "missing_column", "resource_exhausted"]
+              },
+              "attempts": { "type": "integer", "minimum": 1, "maximum": 3 }
+            }
+          },
+          "description": "Details of failed tool calls (if any)"
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "request_id": "550e8400-e29b-41d4-a716-446655440000",
+      "status": "completed",
+      "artifacts": [
+        {
+          "artifact_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+          "artifact_type": "table",
+          "content_ref": "artifacts/tables/550e8400/monthly_sales.csv",
+          "content_hash": "d3f5a7b9c1e3d5f7a9b1c3e5d7f9a1b3c5e7d9f1a3b5c7d9e1f3a5b7c9d1e3f5",
+          "metadata": {
+            "row_count": 3,
+            "column_names": ["month", "total_sales"]
+          },
+          "size_bytes": 256,
+          "created_at": "2025-09-27T10:15:30Z"
+        },
+        {
+          "artifact_id": "8d0f7780-8536-51ef-a827-f18gd2g01bf8",
+          "artifact_type": "chart",
+          "content_ref": "artifacts/charts/550e8400/sales_trend.png",
+          "content_hash": "e4g6b8c0d2f4a6b8c0d2f4a6b8c0d2f4a6b8c0d2f4a6b8c0d2f4a6b8c0d2f4a6",
+          "metadata": {
+            "chart_type": "line",
+            "x_label": "Month",
+            "y_label": "Sales ($)"
+          },
+          "size_bytes": 48392,
+          "created_at": "2025-09-27T10:15:32Z"
+        }
+      ],
+      "summary": {
+        "key_findings": [
+          "Q1 2021 Arizona sales totaled $1.2M",
+          "March showed 15% growth over January",
+          "Phoenix metro contributed 68% of total revenue"
+        ],
+        "insights": "Sales in Arizona showed steady quarter-over-quarter growth, driven primarily by increased demand in the Phoenix metro area. The upward trend suggests market expansion opportunities.",
+        "warnings": []
+      },
+      "metrics": {
+        "execution_time_seconds": 4.2,
+        "tool_calls_count": 3,
+        "retries_count": 0,
+        "rows_processed": 12543,
+        "recipe_used": false
+      },
+      "audit_log_ref": "logs/data_agent_runs.jsonl#550e8400",
+      "plan_ref": "990f8511-f30c-52f5-b938-g29he3h12cg9"
+    },
+    {
+      "request_id": "661f9511-f30c-52f5-b938-557766551111",
+      "status": "failed",
+      "artifacts": [],
+      "summary": {
+        "key_findings": [],
+        "insights": "Analysis failed due to policy violation",
+        "warnings": ["Request attempted to access blocked PII column 'email'"]
+      },
+      "metrics": {
+        "execution_time_seconds": 0.8,
+        "tool_calls_count": 0,
+        "retries_count": 0,
+        "rows_processed": 0,
+        "recipe_used": false
+      },
+      "audit_log_ref": "logs/data_agent_runs.jsonl#661f9511",
+      "plan_ref": "aa1g9622-g41d-63g6-c049-668877662222",
+      "error": {
+        "error_type": "policy_violation",
+        "error_message": "Query blocked: attempted to SELECT column 'email' which matches blocked pattern",
+        "failed_tool_calls": []
+      }
+    }
+  ]
+}
