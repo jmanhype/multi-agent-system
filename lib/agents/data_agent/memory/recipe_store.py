@@ -66,9 +66,17 @@ class RecipeStore:
         self.db_path = Path(db_path)
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         
-        self.embedding_model = SentenceTransformer(embedding_model)
+        self._embedding_model_name = embedding_model
+        self._embedding_model = None
         
         self._init_db()
+    
+    @property
+    def embedding_model(self):
+        """Lazy-load the sentence transformer model."""
+        if self._embedding_model is None:
+            self._embedding_model = SentenceTransformer(self._embedding_model_name)
+        return self._embedding_model
     
     def _init_db(self) -> None:
         """Initialize database schema if not exists."""
@@ -122,7 +130,7 @@ class RecipeStore:
         """
         recipe_id = str(uuid.uuid4())
         
-        intent_embedding = self.embedding_model.encode(intent_template)
+        intent_embedding = self.embedding_model.encode(intent_template).astype(np.float32)
         
         now_iso = datetime.now(timezone.utc).isoformat()
         
@@ -375,7 +383,16 @@ class RecipeStore:
         Returns:
             Cosine similarity score (-1 to 1)
         """
-        return float(np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)))
+        a = a.astype(np.float32)
+        b = b.astype(np.float32)
+        
+        norm_a = np.linalg.norm(a)
+        norm_b = np.linalg.norm(b)
+        
+        if norm_a == 0 or norm_b == 0:
+            return 0.0
+        
+        return float(np.dot(a, b) / (norm_a * norm_b))
     
     def get_stats(self) -> dict:
         """Get recipe store statistics.
