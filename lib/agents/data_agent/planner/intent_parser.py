@@ -101,26 +101,48 @@ class IntentParser:
             messages=[{"role": "user", "content": user_message}],
         )
         
-        response_text = response.content[0].text
+        # Safely extract text content from possibly mixed content blocks
+        content_blocks = getattr(response, "content", []) or []
+        text_parts = []
+        for block in content_blocks:
+            text = getattr(block, "text", None)
+            if text is None and isinstance(block, dict):
+                text = block.get("text")
+            if isinstance(text, str):
+                text_parts.append(text)
+        response_text = "\n".join(text_parts).strip()
         
         try:
-            parsed_json = json.loads(response_text)
-            operations = [
-                Operation(
-                    id=op["id"],
-                    description=op["description"],
-                    dependencies=op.get("dependencies", []),
+            parsed_json = self._extract_json_object(response_text)
+            parsed_json = self._validate_parsed_intent(parsed_json)
+            
+            operations = []
+            for op in parsed_json["operations"]:
+                if not isinstance(op, dict):
+                    raise ValueError("Each operation must be an object")
+                if "id" not in op or "description" not in op:
+                    raise KeyError("operation missing `id` or `description`")
+                deps = op.get("dependencies", [])
+                if deps is None:
+                    deps = []
+                if not isinstance(deps, list):
+                    raise ValueError("`dependencies` must be a list")
+                operations.append(
+                    Operation(
+                        id=str(op["id"]),
+                        description=str(op["description"]),
+                        dependencies=[str(d) for d in deps],
+                    )
                 )
-                for op in parsed_json["operations"]
-            ]
+            
             return ParsedIntent(
-                objective=parsed_json["objective"],
-                data_requirements=parsed_json["data_requirements"],
+                objective=str(parsed_json["objective"]),
+                data_requirements=list(parsed_json["data_requirements"]),
                 operations=operations,
-                deliverables=parsed_json["deliverables"],
-                constraints=parsed_json.get("constraints", []),
+                deliverables=list(parsed_json["deliverables"]),
+                constraints=list(parsed_json.get("constraints", [])),
             )
-        except (json.JSONDecodeError, KeyError) as e:
+        except (json.JSONDecodeError, KeyError, ValueError) as e:
             raise ValueError(f"LLM returned invalid or incomplete JSON: {e}")
     
     def _build_system_prompt(
@@ -180,6 +202,75 @@ Example for parallel workflow:
 }}
 
 Focus on logical operations, not tool implementation details. Identify which operations can run in parallel."""
+    
+    def _extract_json_object(self, text: str) -> Dict[str, Any]:
+        """Extract JSON object from LLM response, handling markdown fences."""
+        stripped = text.strip()
+        
+        # Strip markdown code fences if present
+        if stripped.startswith("```"):
+            first_newline = stripped.find("\n")
+            if first_newline != -1:
+                stripped = stripped[first_newline + 1 :]
+            if stripped.endswith("```"):
+                stripped = stripped[:-3].strip()
+        
+        # Attempt direct parse
+        try:
+            return json.loads(stripped)
+        except json.JSONDecodeError:
+            pass
+        
+        # Fallback: find first top-level JSON object
+        start = stripped.find("{")
+        if start == -1:
+            raise ValueError("No JSON object start found in LLM response.")
+        
+        depth = 0
+        for i, ch in enumerate(stripped[start:], start=start):
+            if ch == "{":
+                depth += 1
+            elif ch == "}":
+                depth -= 1
+                if depth == 0:
+                    candidate = stripped[start : i + 1]
+                    try:
+                        return json.loads(candidate)
+                    except json.JSONDecodeError:
+                        break
+        
+        raise ValueError("Failed to extract valid JSON object from LLM response.")
+    
+    def _validate_parsed_intent(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Validate parsed intent structure and types."""
+        required_keys = ["objective", "data_requirements", "operations", "deliverables"]
+        for k in required_keys:
+            if k not in data:
+                raise ValueError(f"Missing required field '{k}' in parsed intent JSON.")
+        
+        if not isinstance(data["objective"], str):
+            raise ValueError("Field 'objective' must be a string.")
+        if not isinstance(data["data_requirements"], list):
+            raise ValueError("Field 'data_requirements' must be a list.")
+        if not isinstance(data["deliverables"], list):
+            raise ValueError("Field 'deliverables' must be a list.")
+        if not isinstance(data.get("constraints", []), list):
+            raise ValueError("Field 'constraints' must be a list if provided.")
+        
+        ops = data["operations"]
+        if not isinstance(ops, list) or not ops:
+            raise ValueError("Field 'operations' must be a non-empty list.")
+        
+        for idx, op in enumerate(ops):
+            if not isinstance(op, dict):
+                raise ValueError(f"Operation at index {idx} must be an object.")
+            if not isinstance(op.get("id"), str) or not isinstance(op.get("description"), str):
+                raise ValueError(f"Operation {op} must have string 'id' and 'description'.")
+            deps = op.get("dependencies", [])
+            if not isinstance(deps, list) or any(not isinstance(d, str) for d in deps):
+                raise ValueError(f"Operation {op.get('id')} has invalid 'dependencies'; must be list[str].")
+        
+        return data
     
     def _build_user_message(self, intent: str) -> str:
         """Build user message for LLM."""

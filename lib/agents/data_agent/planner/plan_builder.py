@@ -127,10 +127,14 @@ class PlanBuilder:
         steps_map = {}
         
         if operations and isinstance(operations[0], Operation):
+            # Two-pass approach: index operations, create steps, then resolve dependencies
+            op_index: Dict[str, Operation] = {op.id: op for op in operations}
+            step_index: Dict[str, PlanStep] = {}
+            
+            # Pass 1: Create all steps without dependencies
             for op in operations:
                 step_id = f"{plan_id[:8]}-{op.id}"
                 tool = self._select_tool(op.description)
-                resolved_deps = [steps_map[dep_id].step_id for dep_id in op.dependencies if dep_id in steps_map]
                 cost = self.TOOL_COSTS.get(tool, 1.0)
                 invariants = self._extract_invariants(op.description, constraints)
                 
@@ -138,12 +142,22 @@ class PlanBuilder:
                     step_id=step_id,
                     operation=op.description,
                     tool=tool,
-                    dependencies=resolved_deps,
+                    dependencies=[],
                     estimated_cost=cost,
                     invariants=invariants,
                 )
                 steps.append(step)
-                steps_map[op.id] = step
+                step_index[op.id] = step
+            
+            # Pass 2: Resolve dependencies with validation
+            for op in operations:
+                target_step = step_index[op.id]
+                resolved_deps: List[str] = []
+                for dep_id in op.dependencies or []:
+                    if dep_id not in step_index:
+                        raise ValueError(f"Operation '{op.id}' has invalid dependency reference '{dep_id}'")
+                    resolved_deps.append(step_index[dep_id].step_id)
+                target_step.dependencies = resolved_deps
         else:
             for i, operation in enumerate(operations):
                 step_id = f"{plan_id[:8]}-step-{i}"
