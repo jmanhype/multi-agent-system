@@ -4,9 +4,11 @@ Constructs validated DAGs from parsed intents with tool mapping and cost estimat
 """
 
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional, Set
+from typing import List, Dict, Optional, Set, Union
 from enum import Enum
 import uuid
+
+from lib.agents.data_agent.planner.intent_parser import Operation
 
 
 class ToolType(Enum):
@@ -75,20 +77,19 @@ class PlanBuilder:
     def build_plan(
         self,
         objective: str,
-        operations: List[str],
+        operations: Union[List[str], List[Operation]],
         deliverables: List[str],
         constraints: List[str],
     ) -> Plan:
         """Build execution plan from parsed intent.
         
-        Note: The default implementation creates a linear chain where each step
-        depends on the previous one. For more complex DAGs with parallel branches,
-        use add_step() to manually specify dependencies or extend this method to
-        infer parallel operations from the intent.
+        Supports two modes:
+        1. List[Operation]: Full DAG with explicit dependencies (recommended)
+        2. List[str]: Legacy linear chain (each step depends on previous)
         
         Args:
             objective: Analysis goal
-            operations: Ordered logical operations
+            operations: Either Operation objects with dependencies or simple string list
             deliverables: Expected outputs
             constraints: Safety constraints
         
@@ -98,7 +99,19 @@ class PlanBuilder:
         Raises:
             ValueError: If plan contains cycles or invalid dependencies
         
-        Example:
+        Example (with dependencies):
+            >>> from lib.agents.data_agent.planner import Operation
+            >>> builder = PlanBuilder()
+            >>> ops = [
+            ...     Operation("op1", "Query sales", []),
+            ...     Operation("op2", "Query customers", []),
+            ...     Operation("op3", "Join data", ["op1", "op2"]),
+            ... ]
+            >>> plan = builder.build_plan("Join analysis", ops, ["table"], [])
+            >>> len(plan.steps)
+            3
+        
+        Example (legacy linear):
             >>> builder = PlanBuilder()
             >>> plan = builder.build_plan(
             ...     objective="Top customers by revenue",
@@ -111,23 +124,43 @@ class PlanBuilder:
         """
         plan_id = str(uuid.uuid4())
         steps = []
+        steps_map = {}
         
-        for i, operation in enumerate(operations):
-            step_id = f"{plan_id[:8]}-step-{i}"
-            tool = self._select_tool(operation)
-            dependencies = [steps[i-1].step_id] if i > 0 else []
-            cost = self.TOOL_COSTS.get(tool, 1.0)
-            invariants = self._extract_invariants(operation, constraints)
-            
-            step = PlanStep(
-                step_id=step_id,
-                operation=operation,
-                tool=tool,
-                dependencies=dependencies,
-                estimated_cost=cost,
-                invariants=invariants,
-            )
-            steps.append(step)
+        if operations and isinstance(operations[0], Operation):
+            for op in operations:
+                step_id = f"{plan_id[:8]}-{op.id}"
+                tool = self._select_tool(op.description)
+                resolved_deps = [steps_map[dep_id].step_id for dep_id in op.dependencies if dep_id in steps_map]
+                cost = self.TOOL_COSTS.get(tool, 1.0)
+                invariants = self._extract_invariants(op.description, constraints)
+                
+                step = PlanStep(
+                    step_id=step_id,
+                    operation=op.description,
+                    tool=tool,
+                    dependencies=resolved_deps,
+                    estimated_cost=cost,
+                    invariants=invariants,
+                )
+                steps.append(step)
+                steps_map[op.id] = step
+        else:
+            for i, operation in enumerate(operations):
+                step_id = f"{plan_id[:8]}-step-{i}"
+                tool = self._select_tool(operation)
+                dependencies = [steps[i-1].step_id] if i > 0 else []
+                cost = self.TOOL_COSTS.get(tool, 1.0)
+                invariants = self._extract_invariants(operation, constraints)
+                
+                step = PlanStep(
+                    step_id=step_id,
+                    operation=operation,
+                    tool=tool,
+                    dependencies=dependencies,
+                    estimated_cost=cost,
+                    invariants=invariants,
+                )
+                steps.append(step)
         
         self._validate_dag(steps)
         

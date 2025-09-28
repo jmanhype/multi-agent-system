@@ -5,6 +5,7 @@ from unittest.mock import Mock, patch
 from lib.agents.data_agent.planner import (
     IntentParser,
     PlanBuilder,
+    Operation,
 )
 
 
@@ -19,12 +20,12 @@ class TestPlannerIntegration:
             "objective": "Identify top revenue-generating regions",
             "data_requirements": ["sales table", "region column", "revenue column"],
             "operations": [
-                "Query sales data for Q4",
-                "Group by region",
-                "Aggregate revenue sum",
-                "Sort descending by revenue",
-                "Take top 5 regions",
-                "Visualize as bar chart"
+                {"id": "op1", "description": "Query sales data for Q4", "dependencies": []},
+                {"id": "op2", "description": "Group by region", "dependencies": ["op1"]},
+                {"id": "op3", "description": "Aggregate revenue sum", "dependencies": ["op2"]},
+                {"id": "op4", "description": "Sort descending by revenue", "dependencies": ["op3"]},
+                {"id": "op5", "description": "Take top 5 regions", "dependencies": ["op4"]},
+                {"id": "op6", "description": "Visualize as bar chart", "dependencies": ["op5"]}
             ],
             "deliverables": ["ranked table", "bar chart"],
             "constraints": ["enforce row limit", "no PII access"]
@@ -64,11 +65,11 @@ class TestPlannerIntegration:
             "objective": "Compare metrics across dimensions",
             "data_requirements": ["sales", "customers"],
             "operations": [
-                "Query sales data",
-                "Profile sales schema",
-                "Query customer data",
-                "Join sales with customers",
-                "Calculate metrics"
+                {"id": "op1", "description": "Query sales data", "dependencies": []},
+                {"id": "op2", "description": "Profile sales schema", "dependencies": ["op1"]},
+                {"id": "op3", "description": "Query customer data", "dependencies": []},
+                {"id": "op4", "description": "Join sales with customers", "dependencies": ["op1", "op3"]},
+                {"id": "op5", "description": "Calculate metrics", "dependencies": ["op4"]}
             ],
             "deliverables": ["summary table"],
             "constraints": ["row_limit=10000"]
@@ -90,7 +91,7 @@ class TestPlannerIntegration:
         
         for step in plan.steps:
             assert step.tool in [
-                builder._select_tool(op) for op in parsed.operations
+                builder._select_tool(op.description) for op in parsed.operations
             ]
     
     def test_plan_extension_preserves_validity(self):
@@ -131,3 +132,27 @@ class TestPlannerIntegration:
             for step in plan.steps
         )
         assert has_row_constraint
+    
+    def test_parallel_dag_construction(self):
+        """Test that PlanBuilder constructs proper parallel DAG from Operation objects."""
+        builder = PlanBuilder()
+        
+        operations = [
+            Operation(id="op1", description="Query sales data", dependencies=[]),
+            Operation(id="op2", description="Query customer data", dependencies=[]),
+            Operation(id="op3", description="Join sales with customers", dependencies=["op1", "op2"]),
+            Operation(id="op4", description="Calculate metrics", dependencies=["op3"]),
+        ]
+        
+        plan = builder.build_plan(
+            objective="Parallel data integration",
+            operations=operations,
+            deliverables=["metrics table"],
+            constraints=[],
+        )
+        
+        assert len(plan.steps) == 4
+        assert plan.steps[0].dependencies == []
+        assert plan.steps[1].dependencies == []
+        assert len(plan.steps[2].dependencies) == 2
+        assert len(plan.steps[3].dependencies) == 1

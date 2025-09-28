@@ -4,9 +4,23 @@ Converts natural language intents into structured analysis plans using LLM.
 """
 
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 import json
 from anthropic import Anthropic
+
+
+@dataclass
+class Operation:
+    """Single operation in analysis workflow.
+    
+    Attributes:
+        id: Unique operation identifier
+        description: Natural language description of operation
+        dependencies: IDs of operations that must complete first
+    """
+    id: str
+    description: str
+    dependencies: List[str]
 
 
 @dataclass
@@ -16,13 +30,13 @@ class ParsedIntent:
     Attributes:
         objective: High-level goal (e.g., "identify top revenue-generating regions")
         data_requirements: Required data sources and columns
-        operations: Ordered list of logical operations to perform
+        operations: List of Operation objects with dependency information
         deliverables: Expected output artifacts (table, chart, summary)
         constraints: Policy constraints and guardrails to enforce
     """
     objective: str
     data_requirements: List[str]
-    operations: List[str]
+    operations: List[Operation]
     deliverables: List[str]
     constraints: List[str]
 
@@ -73,6 +87,8 @@ class IntentParser:
             >>> parsed = parser.parse(intent, ["sql_runner", "df_operations", "plotter"])
             >>> parsed.objective
             'Identify top 5 customers by Q4 revenue'
+            >>> len(parsed.operations)
+            5
         """
         system_prompt = self._build_system_prompt(available_tools, schema_info)
         user_message = self._build_user_message(intent)
@@ -89,10 +105,18 @@ class IntentParser:
         
         try:
             parsed_json = json.loads(response_text)
+            operations = [
+                Operation(
+                    id=op["id"],
+                    description=op["description"],
+                    dependencies=op.get("dependencies", []),
+                )
+                for op in parsed_json["operations"]
+            ]
             return ParsedIntent(
                 objective=parsed_json["objective"],
                 data_requirements=parsed_json["data_requirements"],
-                operations=parsed_json["operations"],
+                operations=operations,
                 deliverables=parsed_json["deliverables"],
                 constraints=parsed_json.get("constraints", []),
             )
@@ -111,7 +135,7 @@ class IntentParser:
         if schema_info:
             schema_section = f"\n\nAvailable schema:\n{json.dumps(schema_info, indent=2)}"
         
-        return f"""You are a data analysis planner. Parse user intents into structured analysis plans.
+        return f"""You are a data analysis planner. Parse user intents into structured analysis plans with dependency information.
 
 Available tools:
 {tool_list}{schema_section}
@@ -119,26 +143,43 @@ Available tools:
 Output JSON with:
 - objective: Clear goal statement
 - data_requirements: List of required data sources/columns
-- operations: Ordered logical steps (abstract, not tool-specific)
+- operations: List of operation objects with dependencies
+  - Each operation has: id (unique identifier), description (what to do), dependencies (list of operation IDs that must complete first)
+  - Operations with no prerequisites have empty dependencies list
+  - Parallel operations can share the same dependencies
 - deliverables: Expected outputs (table/chart/summary)
 - constraints: Safety constraints to enforce
 
-Example:
+Example for sequential workflow:
 {{
   "objective": "Identify top revenue-generating regions",
   "data_requirements": ["sales table", "region column", "revenue column"],
   "operations": [
-    "Filter sales data for target period",
-    "Group by region",
-    "Aggregate revenue sum",
-    "Sort descending by revenue",
-    "Take top N regions"
+    {{"id": "op1", "description": "Filter sales data for target period", "dependencies": []}},
+    {{"id": "op2", "description": "Group by region", "dependencies": ["op1"]}},
+    {{"id": "op3", "description": "Aggregate revenue sum", "dependencies": ["op2"]}},
+    {{"id": "op4", "description": "Sort descending by revenue", "dependencies": ["op3"]}},
+    {{"id": "op5", "description": "Take top N regions", "dependencies": ["op4"]}}
   ],
   "deliverables": ["ranked table", "bar chart"],
   "constraints": ["enforce row limit", "no PII access"]
 }}
 
-Focus on logical operations, not tool implementation details."""
+Example for parallel workflow:
+{{
+  "objective": "Compare sales and customer metrics",
+  "data_requirements": ["sales table", "customers table"],
+  "operations": [
+    {{"id": "op1", "description": "Query sales data", "dependencies": []}},
+    {{"id": "op2", "description": "Query customer data", "dependencies": []}},
+    {{"id": "op3", "description": "Join sales with customers", "dependencies": ["op1", "op2"]}},
+    {{"id": "op4", "description": "Calculate combined metrics", "dependencies": ["op3"]}}
+  ],
+  "deliverables": ["summary table"],
+  "constraints": ["row_limit=10000"]
+}}
+
+Focus on logical operations, not tool implementation details. Identify which operations can run in parallel."""
     
     def _build_user_message(self, intent: str) -> str:
         """Build user message for LLM."""

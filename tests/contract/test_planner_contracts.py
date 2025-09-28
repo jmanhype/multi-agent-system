@@ -5,6 +5,7 @@ from unittest.mock import Mock, patch
 from lib.agents.data_agent.planner import (
     IntentParser,
     ParsedIntent,
+    Operation,
     PlanBuilder,
     Plan,
     PlanStep,
@@ -19,7 +20,7 @@ class TestIntentParserContract:
     def test_parse_returns_parsed_intent(self, mock_anthropic):
         """IntentParser.parse() must return ParsedIntent with required fields."""
         mock_response = Mock()
-        mock_response.content = [Mock(text='{"objective": "test", "data_requirements": [], "operations": [], "deliverables": [], "constraints": []}')]
+        mock_response.content = [Mock(text='{"objective": "test", "data_requirements": [], "operations": [{"id": "op1", "description": "query", "dependencies": []}], "deliverables": [], "constraints": []}')]
         mock_anthropic.return_value.messages.create.return_value = mock_response
         
         parser = IntentParser(api_key="test-key")
@@ -31,12 +32,14 @@ class TestIntentParserContract:
         assert hasattr(result, 'operations')
         assert hasattr(result, 'deliverables')
         assert hasattr(result, 'constraints')
+        assert len(result.operations) == 1
+        assert isinstance(result.operations[0], Operation)
     
     @patch('lib.agents.data_agent.planner.intent_parser.Anthropic')
     def test_parse_with_schema_info(self, mock_anthropic):
         """IntentParser.parse() must accept optional schema_info parameter."""
         mock_response = Mock()
-        mock_response.content = [Mock(text='{"objective": "test", "data_requirements": [], "operations": [], "deliverables": []}')]
+        mock_response.content = [Mock(text='{"objective": "test", "data_requirements": [], "operations": [{"id": "op1", "description": "query", "dependencies": []}], "deliverables": []}')]
         mock_anthropic.return_value.messages.create.return_value = mock_response
         
         parser = IntentParser(api_key="test-key")
