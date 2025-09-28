@@ -12,7 +12,6 @@ class ExecutionStatus(Enum):
     """Status of tool execution attempt."""
     SUCCESS = "success"
     FAILURE = "failure"
-    PARTIAL = "partial"
 
 
 @dataclass
