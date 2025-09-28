@@ -5,9 +5,10 @@ Coordinates Planner→Actor loop with audit logging and recipe reuse.
 
 import dataclasses
 import hashlib
+import re
 import time
 import uuid
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Union
 from dataclasses import dataclass
 from enum import Enum
 
@@ -38,7 +39,7 @@ class AnalysisRequest:
     """
     request_id: str
     intent: str
-    data_sources: List[str]
+    data_sources: List[Union[Any, str, Dict[str, Any]]]  # Can be DataSource objects, dicts, or strings
     constraints: Optional[Dict[str, Any]] = None
     deliverables: Optional[List[str]] = None
     policy: Optional[Dict[str, Any]] = None
@@ -79,6 +80,13 @@ class DataAgent:
     - Merkle-chained audit logging
     """
     
+    # Sensitive keys to redact in audit logs
+    SENSITIVE_KEYS = {
+        'password', 'token', 'api_key', 'apikey', 'secret', 
+        'credential', 'auth', 'private_key', 'privatekey',
+        'access_token', 'refresh_token', 'bearer', 'connection_string'
+    }
+    
     def __init__(
         self,
         tool_registry: Dict[str, Callable],
@@ -115,6 +123,40 @@ class DataAgent:
         """
         self._progress_callback = callback
     
+    def _redact_sensitive_data(self, obj: Any) -> Any:
+        """Recursively redact sensitive data from objects before logging.
+        
+        Args:
+            obj: Object to redact (dict, list, or primitive)
+            
+        Returns:
+            Redacted copy of the object
+        """
+        if isinstance(obj, dict):
+            redacted = {}
+            for key, value in obj.items():
+                # Check if key contains sensitive patterns
+                key_lower = str(key).lower()
+                is_sensitive = any(
+                    sensitive in key_lower 
+                    for sensitive in self.SENSITIVE_KEYS
+                )
+                
+                if is_sensitive:
+                    redacted[key] = "***REDACTED***"
+                else:
+                    redacted[key] = self._redact_sensitive_data(value)
+            return redacted
+        elif isinstance(obj, list):
+            return [self._redact_sensitive_data(item) for item in obj]
+        elif isinstance(obj, str):
+            # Check for patterns that look like credentials in string values
+            if re.search(r'(password|token|key|secret|credential)[\s]*[=:]\s*\S+', obj, re.IGNORECASE):
+                return "***REDACTED***"
+            return obj
+        else:
+            return obj
+    
     def analyze(self, request: AnalysisRequest) -> AnalysisResponse:
         """Execute end-to-end data analysis.
         
@@ -135,7 +177,7 @@ class DataAgent:
         """
         start_time = time.time()
         
-        # Log request submission with proper serialization
+        # Log request submission with proper serialization and redaction
         serialized_data_sources = []
         for ds in request.data_sources:
             if hasattr(ds, 'model_dump'):
@@ -145,10 +187,13 @@ class DataAgent:
             else:
                 serialized_data_sources.append(ds)
         
+        # Redact sensitive information before logging
+        redacted_data_sources = self._redact_sensitive_data(serialized_data_sources)
+        
         self.audit_tracer.log_request(
             request_id=request.request_id,
             intent=request.intent,
-            data_sources=serialized_data_sources,
+            data_sources=redacted_data_sources,
         )
         
         self._report_progress("Analyzing request", 0.0)

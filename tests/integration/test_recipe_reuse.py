@@ -69,16 +69,17 @@ class TestRecipeReuse:
         print(f"Response artifacts: {len(response.artifacts)}")
         print(f"Response summary: {response.summary}")
         
-        # Assert status with additional verification
-        assert response.status in ["completed", "partial_success"], f"Unexpected status: {response.status}"
+        # Assert status with additional verification using enum
+        from lib.agents.data_agent.agent import AnalysisStatus
+        assert response.status in [AnalysisStatus.SUCCESS, AnalysisStatus.PARTIAL], f"Unexpected status: {response.status}"
         
         # For completed status, verify artifacts exist
-        if response.status == "completed":
-            assert len(response.artifacts) > 0, "Completed status requires artifacts"
+        if response.status == AnalysisStatus.SUCCESS:
+            assert len(response.artifacts) > 0, "Success status requires artifacts"
         
         # For partial_success, verify error is documented
-        if response.status == "partial_success":
-            assert response.error is not None, "Partial success requires error documentation"
+        if response.status == AnalysisStatus.PARTIAL:
+            assert response.error_message is not None, "Partial success requires error documentation"
 
     def test_recipe_retrieval_by_schema_and_intent(self, data_agent, sample_request):
         """FR-032: Retrieve recipe by schema fingerprint + intent similarity."""
