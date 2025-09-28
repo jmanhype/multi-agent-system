@@ -71,21 +71,45 @@ class MerkleLog:
         self._load_last_hash()
     
     def _load_last_hash(self) -> None:
-        """Load hash of last entry from file."""
+        """Load hash of last entry from file.
+        
+        Efficiently reads only the last line using reverse file traversal.
+        """
         if not self.log_path.exists():
             self._last_hash = None
             return
         
         try:
-            with open(self.log_path, 'r') as f:
+            with open(self.log_path, 'rb') as f:
+                # Seek to end of file
+                f.seek(0, 2)
+                file_size = f.tell()
+                
+                if file_size == 0:
+                    self._last_hash = None
+                    return
+                
+                # Read backwards to find last complete line
+                buffer_size = min(4096, file_size)
+                f.seek(max(0, file_size - buffer_size))
+                
+                # Read buffer and find last newline
+                buffer = f.read(buffer_size).decode('utf-8')
+                lines = buffer.splitlines()
+                
+                # Get last non-empty line
                 last_line = None
-                for line in f:
-                    last_line = line.strip()
+                for line in reversed(lines):
+                    if line.strip():
+                        last_line = line.strip()
+                        break
                 
                 if last_line:
                     entry = json.loads(last_line)
                     self._last_hash = entry.get("entry_hash")
-        except (json.JSONDecodeError, IOError):
+                else:
+                    self._last_hash = None
+        except (json.JSONDecodeError, IOError, UnicodeDecodeError):
             self._last_hash = None
     
     def append(

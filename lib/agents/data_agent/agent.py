@@ -3,6 +3,7 @@
 Coordinates Planner→Actor loop with audit logging and recipe reuse.
 """
 
+import hashlib
 import time
 import uuid
 from typing import Any, Callable, Dict, List, Optional
@@ -148,8 +149,19 @@ class DataAgent:
             recipe_used = None
             
             if request.data_sources:
-                schema_fp = self._get_schema_fingerprint(request.data_sources[0])
-                if schema_fp:
+                # Generate composite fingerprint from all data sources
+                fingerprints = []
+                for ds in request.data_sources:
+                    fp = self._get_schema_fingerprint(ds)
+                    if fp:
+                        fingerprints.append(fp)
+                
+                if fingerprints:
+                    # Combine fingerprints with sorted concatenation for deterministic result
+                    schema_fp = hashlib.sha256(
+                        "-".join(sorted(fingerprints)).encode('utf-8')
+                    ).hexdigest()
+                    
                     recipes = self.recipe_store.retrieve_recipes(
                         schema_fingerprint=schema_fp,
                         intent_query=request.intent,

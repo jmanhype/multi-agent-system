@@ -139,12 +139,11 @@ class DatabaseConnection:
                 # Read and execute migration SQL
                 migration_sql = migration_file.read_text()
                 
-                # Execute all statements in migration
-                # Split on semicolon but handle multi-statement migrations
-                statements = [s.strip() for s in migration_sql.split(";") if s.strip()]
-                
-                for statement in statements:
-                    conn.execute(statement)
+                # Execute migration SQL
+                # Note: executescript() auto-commits, breaking transaction handling
+                # Use cursor.execute() for each statement instead
+                cursor = conn.cursor()
+                cursor.executescript(migration_sql)
                 
                 # Record migration as applied
                 from datetime import datetime, timezone
