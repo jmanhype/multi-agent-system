@@ -87,15 +87,17 @@ class IntentParser:
         
         response_text = response.content[0].text
         
-        parsed_json = json.loads(response_text)
-        
-        return ParsedIntent(
-            objective=parsed_json["objective"],
-            data_requirements=parsed_json["data_requirements"],
-            operations=parsed_json["operations"],
-            deliverables=parsed_json["deliverables"],
-            constraints=parsed_json.get("constraints", []),
-        )
+        try:
+            parsed_json = json.loads(response_text)
+            return ParsedIntent(
+                objective=parsed_json["objective"],
+                data_requirements=parsed_json["data_requirements"],
+                operations=parsed_json["operations"],
+                deliverables=parsed_json["deliverables"],
+                constraints=parsed_json.get("constraints", []),
+            )
+        except (json.JSONDecodeError, KeyError) as e:
+            raise ValueError(f"LLM returned invalid or incomplete JSON: {e}")
     
     def _build_system_prompt(
         self,

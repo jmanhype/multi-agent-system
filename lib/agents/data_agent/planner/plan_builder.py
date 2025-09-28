@@ -81,6 +81,11 @@ class PlanBuilder:
     ) -> Plan:
         """Build execution plan from parsed intent.
         
+        Note: The default implementation creates a linear chain where each step
+        depends on the previous one. For more complex DAGs with parallel branches,
+        use add_step() to manually specify dependencies or extend this method to
+        infer parallel operations from the intent.
+        
         Args:
             objective: Analysis goal
             operations: Ordered logical operations
@@ -233,7 +238,7 @@ class PlanBuilder:
         Raises:
             ValueError: If adding step creates cycle
         """
-        step_id = f"{plan.plan_id[:8]}-step-{len(plan.steps)}"
+        step_id = str(uuid.uuid4())
         tool = self._select_tool(operation)
         cost = self.TOOL_COSTS.get(tool, 1.0)
         invariants = self._extract_invariants(operation, constraints or [])
