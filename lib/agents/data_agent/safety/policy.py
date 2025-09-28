@@ -73,13 +73,22 @@ class SQLPolicyChecker:
                 violations.append(f"Dangerous operation blocked: {keyword}")
                 severity = "critical"
         
-        if '--' in query and not query.strip().startswith('--'):
-            violations.append("SQL comment detected (potential injection)")
-            severity = max(severity, "high", key=lambda x: ["none", "low", "medium", "high", "critical"].index(x))
+        # Check for SQL comments outside of string literals
+        if not query.strip().startswith('--'):
+            # Match string literals or comments, check if comment appears first
+            match = re.search(r"'(?:[^']|'')*'|--", query)
+            if match and match.group(0) == '--':
+                violations.append("SQL comment detected (potential injection)")
+                severity = max(severity, "high", key=lambda x: ["none", "low", "medium", "high", "critical"].index(x))
         
-        if ';' in query.strip().rstrip(';'):
-            violations.append("Multiple statements detected (potential injection)")
-            severity = max(severity, "high", key=lambda x: ["none", "low", "medium", "high", "critical"].index(x))
+        # Check for multiple statements (semicolons outside of string literals)
+        stripped = query.strip().rstrip(';')
+        if stripped:
+            # Match string literals or semicolons, check if semicolon appears outside literals
+            match = re.search(r"'(?:[^']|'')*'|;", stripped)
+            if match and match.group(0) == ';':
+                violations.append("Multiple statements detected (potential injection)")
+                severity = max(severity, "high", key=lambda x: ["none", "low", "medium", "high", "critical"].index(x))
         
         allowed = len(violations) == 0
         
