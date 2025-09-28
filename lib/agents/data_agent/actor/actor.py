@@ -126,10 +126,9 @@ class Actor:
             True
         """
         max_retries = max_retries if max_retries is not None else self.MAX_RETRIES
-        retry_count = 0
         last_error = None
         
-        while retry_count <= max_retries:
+        for attempt in range(max_retries + 1):
             try:
                 result = self._execute_tool(tool_call)
                 
@@ -138,7 +137,7 @@ class Actor:
                     status=ExecutionStatus.SUCCESS,
                     result=result,
                     error_message=None,
-                    retry_count=retry_count,
+                    retry_count=attempt,
                     metadata=self._extract_metadata(result),
                 )
                 
@@ -147,7 +146,6 @@ class Actor:
                 
             except Exception as e:
                 last_error = e
-                
                 error_message = f"{type(e).__name__}: {str(e)}"
                 
                 observation = Observation(
@@ -155,26 +153,26 @@ class Actor:
                     status=ExecutionStatus.FAILURE,
                     result=None,
                     error_message=error_message,
-                    retry_count=retry_count,
+                    retry_count=attempt,
                 )
                 
-                if retry_count < max_retries and observation.is_recoverable():
-                    retry_count += 1
+                if attempt < max_retries and observation.is_recoverable():
                     continue
                 else:
-                    self.execution_history.append(observation)
-                    return observation
-        
-        final_observation = Observation(
-            step_id=tool_call.step_id,
-            status=ExecutionStatus.FAILURE,
-            result=None,
-            error_message=f"Max retries ({max_retries}) exceeded. Last error: {last_error}",
-            retry_count=max_retries,
-        )
-        
-        self.execution_history.append(final_observation)
-        return final_observation
+                    # Non-recoverable error or last attempt failed
+                    final_error_message = f"Max retries ({max_retries}) exceeded. Last error: {last_error}"
+                    if not observation.is_recoverable():
+                        final_error_message = f"Non-recoverable error: {error_message}"
+                    
+                    final_observation = Observation(
+                        step_id=tool_call.step_id,
+                        status=ExecutionStatus.FAILURE,
+                        result=None,
+                        error_message=final_error_message,
+                        retry_count=attempt,
+                    )
+                    self.execution_history.append(final_observation)
+                    return final_observation
     
     def execute_step(
         self,
@@ -362,11 +360,12 @@ class Actor:
     
     def _has_prior_filter(self, step: PlanStep) -> bool:
         """Check if step has a filter operation in its dependency chain."""
-        for obs in self.execution_history:
-            for dep_id in step.dependencies:
-                if obs.step_id == dep_id:
-                    if obs.metadata.get("operation_type") == "filter":
-                        return True
+        history_map = {obs.step_id: obs for obs in self.execution_history}
+        for dep_id in step.dependencies:
+            if dep_id in history_map:
+                dep_obs = history_map[dep_id]
+                if dep_obs.metadata.get("operation_type") == "filter":
+                    return True
         return False
     
     def _extract_metadata(self, result: Any) -> Dict[str, Any]:

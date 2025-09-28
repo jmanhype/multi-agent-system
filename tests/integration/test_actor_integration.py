@@ -146,7 +146,7 @@ class TestActorPlanExecution:
         
         assert obs.status == ExecutionStatus.FAILURE
         assert obs.retry_count == 3
-        assert "Max retries" in obs.error_message or obs.retry_count == 3
+        assert "Max retries" in obs.error_message
         assert mock_tool.call_count == 4
     
     def test_invariant_validation_enforcement(self):
