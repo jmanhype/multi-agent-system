@@ -138,7 +138,7 @@ class DataAgent:
         self.audit_tracer.log_request(
             request_id=request.request_id,
             intent=request.intent,
-            data_sources=request.data_sources,
+            data_sources=[ds.model_dump() if hasattr(ds, 'model_dump') else ds for ds in request.data_sources],
         )
         
         self._report_progress("Analyzing request", 0.0)
