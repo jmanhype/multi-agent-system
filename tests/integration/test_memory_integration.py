@@ -3,7 +3,8 @@
 Tests recipe storage and retrieval end-to-end workflows.
 
 NOTE: These tests require sentence-transformers model downloads and may have network dependencies.
-They are currently skipped pending proper test infrastructure setup.
+Run with: pytest -m integration
+Skip with: pytest -m "not integration"
 """
 
 import tempfile
@@ -18,7 +19,7 @@ from lib.agents.data_agent.memory import (
 )
 
 
-pytestmark = pytest.mark.skip(reason="Integration tests require model downloads and network access")
+pytestmark = pytest.mark.integration
 
 
 class TestMemoryLayerIntegration:

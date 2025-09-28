@@ -3,6 +3,7 @@
 Coordinates Planner→Actor loop with audit logging and recipe reuse.
 """
 
+import dataclasses
 import hashlib
 import time
 import uuid
@@ -134,11 +135,20 @@ class DataAgent:
         """
         start_time = time.time()
         
-        # Log request submission
+        # Log request submission with proper serialization
+        serialized_data_sources = []
+        for ds in request.data_sources:
+            if hasattr(ds, 'model_dump'):
+                serialized_data_sources.append(ds.model_dump())
+            elif dataclasses.is_dataclass(ds) and not isinstance(ds, type):
+                serialized_data_sources.append(dataclasses.asdict(ds))
+            else:
+                serialized_data_sources.append(ds)
+        
         self.audit_tracer.log_request(
             request_id=request.request_id,
             intent=request.intent,
-            data_sources=[ds.model_dump() if hasattr(ds, 'model_dump') else ds for ds in request.data_sources],
+            data_sources=serialized_data_sources,
         )
         
         self._report_progress("Analyzing request", 0.0)

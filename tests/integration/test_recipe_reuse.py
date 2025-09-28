@@ -4,7 +4,8 @@ Integration test for recipe storage and retrieval functionality.
 Tests FR-031 to FR-033: Recipe memory for successful analysis patterns.
 
 NOTE: These tests require LLM API keys and/or database connections to function properly.
-They are currently skipped pending proper test infrastructure setup.
+Run with: pytest -m integration
+Skip with: pytest -m "not integration"
 """
 
 import pytest
@@ -12,7 +13,7 @@ from lib.agents.data_agent.agent import DataAgent
 from lib.agents.data_agent.contracts.request import AnalysisRequest
 
 
-pytestmark = pytest.mark.skip(reason="Integration tests require LLM API and database setup")
+pytestmark = pytest.mark.integration
 
 
 @pytest.fixture
@@ -68,7 +69,16 @@ class TestRecipeReuse:
         print(f"Response artifacts: {len(response.artifacts)}")
         print(f"Response summary: {response.summary}")
         
-        assert response.status == "completed" or response.status == "partial_success"
+        # Assert status with additional verification
+        assert response.status in ["completed", "partial_success"], f"Unexpected status: {response.status}"
+        
+        # For completed status, verify artifacts exist
+        if response.status == "completed":
+            assert len(response.artifacts) > 0, "Completed status requires artifacts"
+        
+        # For partial_success, verify error is documented
+        if response.status == "partial_success":
+            assert response.error is not None, "Partial success requires error documentation"
 
     def test_recipe_retrieval_by_schema_and_intent(self, data_agent, sample_request):
         """FR-032: Retrieve recipe by schema fingerprint + intent similarity."""
