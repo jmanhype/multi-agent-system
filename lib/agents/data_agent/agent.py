@@ -3,10 +3,12 @@
 Coordinates Planner→Actor loop with audit logging and recipe reuse.
 """
 
+import dataclasses
 import hashlib
+import re
 import time
 import uuid
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Union
 from dataclasses import dataclass
 from enum import Enum
 
@@ -37,7 +39,7 @@ class AnalysisRequest:
     """
     request_id: str
     intent: str
-    data_sources: List[str]
+    data_sources: List[Union[Any, str, Dict[str, Any]]]  # Can be DataSource objects, dicts, or strings
     constraints: Optional[Dict[str, Any]] = None
     deliverables: Optional[List[str]] = None
     policy: Optional[Dict[str, Any]] = None
@@ -78,6 +80,14 @@ class DataAgent:
     - Merkle-chained audit logging
     """
     
+    # Sensitive keys to redact in audit logs (normalized without separators)
+    SENSITIVE_KEYS = {
+        'password', 'passwd', 'pwd', 'token', 'apikey', 'secret',
+        'credential', 'auth', 'privatekey', 'publickey',
+        'accesstoken', 'refreshtoken', 'bearer', 'connectionstring',
+        'clientsecret', 'clientid', 'sessionid', 'sessiontoken'
+    }
+    
     def __init__(
         self,
         tool_registry: Dict[str, Callable],
@@ -114,6 +124,59 @@ class DataAgent:
         """
         self._progress_callback = callback
     
+    def _redact_sensitive_data(self, obj: Any) -> Any:
+        """Recursively redact sensitive data from objects before logging.
+        
+        Args:
+            obj: Object to redact (dict, list, or primitive)
+            
+        Returns:
+            Redacted copy of the object
+        """
+        def _normalize_key(key: Any) -> str:
+            """Normalize key for comparison by removing non-alphanumeric chars and lowercasing."""
+            return re.sub(r'[^a-z0-9]', '', str(key).lower())
+        
+        if isinstance(obj, dict):
+            redacted = {}
+            for key, value in obj.items():
+                # Normalize key for comparison
+                key_normalized = _normalize_key(key)
+                is_sensitive = any(
+                    sensitive in key_normalized 
+                    for sensitive in self.SENSITIVE_KEYS
+                )
+                
+                if is_sensitive:
+                    redacted[key] = "***REDACTED***"
+                else:
+                    redacted[key] = self._redact_sensitive_data(value)
+            return redacted
+        elif isinstance(obj, list):
+            return [self._redact_sensitive_data(item) for item in obj]
+        elif isinstance(obj, str):
+            # Improved patterns for detecting credentials in string values
+            credential_patterns = [
+                # Bearer tokens
+                r'(?i)\b(bearer)\s+[A-Za-z0-9\-\._~\+\/]+=*',
+                # Key-value assignments with various formats
+                r'(?i)\b(password|passwd|pwd|token|access[_\-]?token|refresh[_\-]?token|'
+                r'api[_\-]?key|secret|private[_\-]?key|connection[_\-]?string|'
+                r'client[_\-]?secret|session[_\-]?id|session[_\-]?token)\b\s*[:=]\s*'
+                r'("[^"]+"|\'[^\']+\'|[^\s,;]+)',
+                # High-entropy strings that look like tokens (32+ chars)
+                r'\b[A-Za-z0-9+/]{32,}={0,2}\b',
+                # AWS-style keys
+                r'(?i)\b(AKIA|A3T|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}\b',
+            ]
+            
+            for pattern in credential_patterns:
+                if re.search(pattern, obj):
+                    return "***REDACTED***"
+            return obj
+        else:
+            return obj
+    
     def analyze(self, request: AnalysisRequest) -> AnalysisResponse:
         """Execute end-to-end data analysis.
         
@@ -134,11 +197,23 @@ class DataAgent:
         """
         start_time = time.time()
         
-        # Log request submission
+        # Log request submission with proper serialization and redaction
+        serialized_data_sources = []
+        for ds in request.data_sources:
+            if hasattr(ds, 'model_dump'):
+                serialized_data_sources.append(ds.model_dump())
+            elif dataclasses.is_dataclass(ds) and not isinstance(ds, type):
+                serialized_data_sources.append(dataclasses.asdict(ds))
+            else:
+                serialized_data_sources.append(ds)
+        
+        # Redact sensitive information before logging
+        redacted_data_sources = self._redact_sensitive_data(serialized_data_sources)
+        
         self.audit_tracer.log_request(
             request_id=request.request_id,
             intent=request.intent,
-            data_sources=[ds.model_dump() if hasattr(ds, 'model_dump') else ds for ds in request.data_sources],
+            data_sources=redacted_data_sources,
         )
         
         self._report_progress("Analyzing request", 0.0)
