@@ -88,6 +88,8 @@ def login(client_id: Optional[str], port: int):
     import socketserver
     import threading
     import queue
+    import hashlib
+    import base64
     from urllib.parse import urlparse, parse_qs
     
     config = load_config()
@@ -96,17 +98,25 @@ def login(client_id: Optional[str], port: int):
     if not client_id:
         client_id = config.get('client_id', 'dataagent-cli-prod')
     
+    # Generate PKCE parameters for enhanced security
+    code_verifier = base64.urlsafe_b64encode(os.urandom(32)).decode('utf-8').rstrip('=')
+    code_challenge = base64.urlsafe_b64encode(
+        hashlib.sha256(code_verifier.encode()).digest()
+    ).decode('utf-8').rstrip('=')
+    
     # Generate state for CSRF protection
     state = os.urandom(16).hex()
     redirect_uri = f'http://localhost:{port}/callback'
     
-    # OAuth authorization URL for Claude
+    # OAuth authorization URL for Claude with PKCE
     auth_params = {
         'client_id': client_id,
         'response_type': 'code',
         'redirect_uri': redirect_uri,
-        'scope': 'data:analyze model:access subscription:read',
+        'scope': 'chat:write chat:read account:read',  # Claude's actual scopes
         'state': state,
+        'code_challenge': code_challenge,
+        'code_challenge_method': 'S256',
         'access_type': 'offline',
         'prompt': 'consent'
     }
@@ -179,12 +189,13 @@ def login(client_id: Optional[str], port: int):
                 ) as progress:
                     task = progress.add_task("Exchanging code...", total=None)
                     
-                    # Try real token exchange
+                    # Try real token exchange with PKCE
                     token_data = {
                         'grant_type': 'authorization_code',
                         'code': value,
                         'client_id': client_id,
-                        'redirect_uri': redirect_uri
+                        'redirect_uri': redirect_uri,
+                        'code_verifier': code_verifier
                     }
                     
                     try:
