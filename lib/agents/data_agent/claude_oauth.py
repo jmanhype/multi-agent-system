@@ -70,7 +70,7 @@ class ClaudeOAuth:
                 'client_id': client_id,
                 'response_type': 'code',
                 'redirect_uri': redirect_uri,
-                'scope': 'chat:write chat:read account:read',
+                'scope': 'org:create_api_key user:profile user:inference',  # Correct scopes from claude_max
                 'state': state,
                 'code_challenge': code_challenge,
                 'code_challenge_method': 'S256',

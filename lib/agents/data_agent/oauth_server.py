@@ -72,7 +72,7 @@ class OAuthDCRServer:
                     "authorization_endpoint": "https://claude.ai/oauth/authorize",
                     "token_endpoint": "https://claude.ai/oauth/token",
                     "registration_endpoint": f"{dcr_server.base_url}/register",
-                    "scopes_supported": ["chat:write", "chat:read", "account:read"],
+                    "scopes_supported": ["org:create_api_key", "user:profile", "user:inference"],
                     "response_types_supported": ["code"],
                     "grant_types_supported": ["authorization_code", "refresh_token"],
                     "code_challenge_methods_supported": ["S256"],
@@ -114,7 +114,7 @@ class OAuthDCRServer:
                     "response_types": ["code"],
                     "token_endpoint_auth_method": "none",
                     "application_type": "native",
-                    "scope": "chat:write chat:read account:read",
+                    "scope": "org:create_api_key user:profile user:inference",
                     "client_id_issued_at": int(time.time())
                 }
                 
