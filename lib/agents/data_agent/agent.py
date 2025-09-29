@@ -80,11 +80,12 @@ class DataAgent:
     - Merkle-chained audit logging
     """
     
-    # Sensitive keys to redact in audit logs
+    # Sensitive keys to redact in audit logs (normalized without separators)
     SENSITIVE_KEYS = {
-        'password', 'token', 'api_key', 'apikey', 'secret', 
-        'credential', 'auth', 'private_key', 'privatekey',
-        'access_token', 'refresh_token', 'bearer', 'connection_string'
+        'password', 'passwd', 'pwd', 'token', 'apikey', 'secret',
+        'credential', 'auth', 'privatekey', 'publickey',
+        'accesstoken', 'refreshtoken', 'bearer', 'connectionstring',
+        'clientsecret', 'clientid', 'sessionid', 'sessiontoken'
     }
     
     def __init__(
@@ -132,13 +133,17 @@ class DataAgent:
         Returns:
             Redacted copy of the object
         """
+        def _normalize_key(key: Any) -> str:
+            """Normalize key for comparison by removing non-alphanumeric chars and lowercasing."""
+            return re.sub(r'[^a-z0-9]', '', str(key).lower())
+        
         if isinstance(obj, dict):
             redacted = {}
             for key, value in obj.items():
-                # Check if key contains sensitive patterns
-                key_lower = str(key).lower()
+                # Normalize key for comparison
+                key_normalized = _normalize_key(key)
                 is_sensitive = any(
-                    sensitive in key_lower 
+                    sensitive in key_normalized 
                     for sensitive in self.SENSITIVE_KEYS
                 )
                 
@@ -150,9 +155,24 @@ class DataAgent:
         elif isinstance(obj, list):
             return [self._redact_sensitive_data(item) for item in obj]
         elif isinstance(obj, str):
-            # Check for patterns that look like credentials in string values
-            if re.search(r'(password|token|key|secret|credential)[\s]*[=:]\s*\S+', obj, re.IGNORECASE):
-                return "***REDACTED***"
+            # Improved patterns for detecting credentials in string values
+            credential_patterns = [
+                # Bearer tokens
+                r'(?i)\b(bearer)\s+[A-Za-z0-9\-\._~\+\/]+=*',
+                # Key-value assignments with various formats
+                r'(?i)\b(password|passwd|pwd|token|access[_\-]?token|refresh[_\-]?token|'
+                r'api[_\-]?key|secret|private[_\-]?key|connection[_\-]?string|'
+                r'client[_\-]?secret|session[_\-]?id|session[_\-]?token)\b\s*[:=]\s*'
+                r'("[^"]+"|\'[^\']+\'|[^\s,;]+)',
+                # High-entropy strings that look like tokens (32+ chars)
+                r'\b[A-Za-z0-9+/]{32,}={0,2}\b',
+                # AWS-style keys
+                r'(?i)\b(AKIA|A3T|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}\b',
+            ]
+            
+            for pattern in credential_patterns:
+                if re.search(pattern, obj):
+                    return "***REDACTED***"
             return obj
         else:
             return obj
