@@ -79,171 +79,43 @@ def auth():
 
 
 @auth.command()
-@click.option('--client-id', help='OAuth client ID', envvar='DATAAGENT_CLIENT_ID',
-              default='dataagent-cli-prod')
 @click.option('--port', default=8080, help='Local port for OAuth callback')
-def login(client_id: Optional[str], port: int):
-    """Login with your Claude subscription via OAuth."""
-    import http.server
-    import socketserver
-    import threading
-    import queue
-    import hashlib
-    import base64
-    from urllib.parse import urlparse, parse_qs
+def login(port: int):
+    """Login with your Claude subscription via OAuth (with Dynamic Client Registration)."""
+    from .claude_oauth import ClaudeOAuth
     
     config = load_config()
-    auth_queue = queue.Queue()
     
-    if not client_id:
-        client_id = config.get('client_id', 'dataagent-cli-prod')
+    console.print("[cyan]🔧 Initializing OAuth with Dynamic Client Registration...[/cyan]")
     
-    # Generate PKCE parameters for enhanced security
-    code_verifier = base64.urlsafe_b64encode(os.urandom(32)).decode('utf-8').rstrip('=')
-    code_challenge = base64.urlsafe_b64encode(
-        hashlib.sha256(code_verifier.encode()).digest()
-    ).decode('utf-8').rstrip('=')
+    oauth = ClaudeOAuth()
+    token = oauth.authenticate(callback_port=port)
     
-    # Generate state for CSRF protection
-    state = os.urandom(16).hex()
-    redirect_uri = f'http://localhost:{port}/callback'
-    
-    # OAuth authorization URL for Claude with PKCE
-    auth_params = {
-        'client_id': client_id,
-        'response_type': 'code',
-        'redirect_uri': redirect_uri,
-        'scope': 'chat:write chat:read account:read',  # Claude's actual scopes
-        'state': state,
-        'code_challenge': code_challenge,
-        'code_challenge_method': 'S256',
-        'access_type': 'offline',
-        'prompt': 'consent'
-    }
-    
-    auth_url = f"https://claude.ai/oauth/authorize?{urlencode(auth_params)}"
-    
-    # Create callback handler
-    class CallbackHandler(http.server.SimpleHTTPRequestHandler):
-        def do_GET(self):
-            parsed = urlparse(self.path)
-            if parsed.path == '/callback':
-                params = parse_qs(parsed.query)
-                
-                if params.get('state', [''])[0] != state:
-                    self.send_response(400)
-                    self.end_headers()
-                    self.wfile.write(b"Invalid state")
-                    return
-                
-                if 'code' in params:
-                    auth_queue.put(('success', params['code'][0]))
-                    self.send_response(200)
-                    self.send_header('Content-type', 'text/html')
-                    self.end_headers()
-                    html = '''<!DOCTYPE html><html><head>
-                    <title>DataAgent - Success</title>
-                    <style>body{font-family:system-ui;display:flex;justify-content:center;
-                    align-items:center;height:100vh;margin:0;background:#667eea;}
-                    .container{background:white;padding:40px;border-radius:10px;text-align:center;}
-                    .success{color:#48bb78;font-size:48px;}</style></head>
-                    <body><div class="container"><div class="success">✓</div>
-                    <h1>Authentication Successful!</h1>
-                    <p>You can close this window.</p></div></body></html>'''.encode('utf-8')
-                    self.wfile.write(html)
-                elif 'error' in params:
-                    auth_queue.put(('error', params.get('error_description', ['Unknown'])[0]))
-                    self.send_response(400)
-                    self.end_headers()
-            else:
-                self.send_response(404)
-                self.end_headers()
-        
-        def log_message(self, format, *args):
-            pass  # Suppress logs
-    
-    # Start local server
-    server = None
-    try:
-        server = socketserver.TCPServer(("", port), CallbackHandler)
-        server_thread = threading.Thread(target=server.serve_forever)
-        server_thread.daemon = True
-        server_thread.start()
-        
-        console.print(f"[cyan]🔐 Opening browser for Claude authentication...[/cyan]")
-        console.print(f"[dim]If browser doesn't open: {auth_url}[/dim]\n")
-        
-        time.sleep(0.5)
-        webbrowser.open(auth_url)
-        
-        console.print("[yellow]⏳ Waiting for authentication...[/yellow]")
-        
-        try:
-            status, value = auth_queue.get(timeout=120)
+    if token:
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            console=console,
+        ) as progress:
+            task = progress.add_task("Saving credentials...", total=None)
             
-            if status == 'success':
-                with Progress(
-                    SpinnerColumn(),
-                    TextColumn("[progress.description]{task.description}"),
-                    console=console,
-                ) as progress:
-                    task = progress.add_task("Exchanging code...", total=None)
-                    
-                    # Try real token exchange with PKCE
-                    token_data = {
-                        'grant_type': 'authorization_code',
-                        'code': value,
-                        'client_id': client_id,
-                        'redirect_uri': redirect_uri,
-                        'code_verifier': code_verifier
-                    }
-                    
-                    try:
-                        response = requests.post(
-                            'https://claude.ai/oauth/token',
-                            data=token_data,
-                            headers={'Content-Type': 'application/x-www-form-urlencoded'},
-                            timeout=10
-                        )
-                        
-                        if response.status_code == 200:
-                            token_resp = response.json()
-                            tokens = {
-                                'access_token': token_resp['access_token'],
-                                'refresh_token': token_resp.get('refresh_token'),
-                                'expires_at': time.time() + token_resp.get('expires_in', 3600),
-                                'token_type': token_resp.get('token_type', 'Bearer')
-                            }
-                        else:
-                            raise requests.exceptions.RequestException("Token exchange failed")
-                    except:
-                        # Demo mode if real OAuth not available
-                        console.print("[yellow]⚠ Demo mode (OAuth endpoint not available)[/yellow]")
-                        tokens = {
-                            'access_token': f"demo_{value[:20] if len(value)>20 else value}",
-                            'refresh_token': f"demo_{os.urandom(8).hex()}",
-                            'expires_at': time.time() + 3600,
-                            'token_type': 'Bearer'
-                        }
-                    
-                    save_tokens(tokens)
-                    save_config(config)
-                    progress.update(task, completed=True)
-                
-                console.print("[green]✅ Successfully authenticated![/green]")
-                console.print("[dim]Tokens saved to ~/.dataagent/tokens.json[/dim]")
-            else:
-                console.print(f"[red]✗ Authentication failed: {value}[/red]")
-                sys.exit(1)
-                
-        except queue.Empty:
-            console.print("[red]✗ Authentication timeout[/red]")
-            sys.exit(1)
-    
-    finally:
-        if server:
-            server.shutdown()
-            server.server_close()
+            tokens = {
+                'access_token': token,
+                'refresh_token': None,  # Will be added if refresh token is provided
+                'expires_at': time.time() + 3600,  # Default 1 hour
+                'token_type': 'Bearer'
+            }
+            
+            save_tokens(tokens)
+            save_config(config)
+            progress.update(task, completed=True)
+        
+        console.print("[green]✅ Successfully authenticated with Claude![/green]")
+        console.print("[dim]Tokens saved to ~/.dataagent/tokens.json[/dim]")
+        console.print("\n[cyan]You can now use DataAgent with your Claude subscription![/cyan]")
+    else:
+        console.print("[red]✗ Authentication failed. Please try again.[/red]")
+        sys.exit(1)
 
 
 @auth.command()
