@@ -18,7 +18,7 @@ import time
 from urllib.parse import urlencode
 import requests
 
-from lib.agents.data_agent.fluent_oauth import DataAgent, OAuthConfig
+from lib.agents.data_agent.fluent_oauth import FluentDataAgent as DataAgent, OAuthConfig
 
 console = Console()
 
@@ -206,62 +206,55 @@ def analyze(query: str, source: Optional[str], format: str, output: Optional[str
         
         try:
             # Initialize DataAgent with OAuth token
-            agent = DataAgent()
-            agent = agent.with_oauth_token(tokens['access_token'])
+            agent = DataAgent.with_existing_token(tokens['access_token'])
             
             # Add data source if provided
             if source:
-                if source.endswith('.csv'):
-                    agent = agent.from_csv(source)
-                elif source.startswith(('postgresql://', 'mysql://', 'sqlite://')):
-                    agent = agent.connect_sql(source)
-                else:
-                    agent = agent.from_data(source)
+                agent = agent.connect(source)
             
-            # Apply query
-            agent = agent.query(query)
+            # Apply query with natural language
+            agent = agent.explain(query)
             
             # Apply limit if specified
             if limit:
                 agent = agent.limit(limit)
             
             # Execute analysis
-            result = agent.analyze()
+            result = agent.execute()
             
             progress.update(task, completed=True)
             
             # Display results
-            if format == 'table' and hasattr(result, 'data'):
-                display_table(result.data)
+            if format == 'table' and isinstance(result, dict) and 'data' in result:
+                display_table(result['data'])
             elif format == 'json':
-                json_output = json.dumps(result.to_dict(), indent=2)
+                json_output = json.dumps(result, indent=2)
                 if output:
                     Path(output).write_text(json_output)
                     console.print(f"[green]✓ Results saved to {output}[/green]")
                 else:
                     console.print(Syntax(json_output, "json"))
-            elif format == 'csv' and hasattr(result, 'data'):
-                csv_output = result.data.to_csv(index=False)
+            elif format == 'csv' and isinstance(result, dict) and 'data' in result:
+                # For mock, just display as table since we don't have actual dataframe
+                display_table(result['data'])
                 if output:
-                    Path(output).write_text(csv_output)
-                    console.print(f"[green]✓ Results saved to {output}[/green]")
-                else:
-                    console.print(csv_output)
-            elif format == 'chart' and hasattr(result, 'charts'):
-                for chart_name, chart_data in result.charts.items():
+                    console.print(f"[yellow]CSV export would save to {output}[/yellow]")
+            elif format == 'chart' and isinstance(result, dict) and 'charts' in result:
+                for chart_name, chart_data in result['charts'].items():
                     console.print(f"[cyan]Chart: {chart_name}[/cyan]")
                     # In production, render actual chart
                     console.print(f"[dim]{chart_data}[/dim]")
             
             # Display summary
-            if hasattr(result, 'summary'):
+            if isinstance(result, dict) and 'summary' in result:
                 console.print("\n[bold]Summary:[/bold]")
-                console.print(result.summary)
+                console.print(result['summary'])
             
             # Display metrics
-            if hasattr(result, 'metrics'):
-                console.print(f"\n[dim]Execution time: {result.metrics.execution_time:.2f}s[/dim]")
-                console.print(f"[dim]Rows processed: {result.metrics.rows_processed}[/dim]")
+            if isinstance(result, dict) and 'metrics' in result:
+                metrics = result['metrics']
+                console.print(f"\n[dim]Execution time: {metrics.get('execution_time', 0):.2f}s[/dim]")
+                console.print(f"[dim]Rows processed: {metrics.get('rows_processed', 0)}[/dim]")
         
         except Exception as e:
             progress.stop()
@@ -271,6 +264,20 @@ def analyze(query: str, source: Optional[str], format: str, output: Optional[str
 
 def display_table(data):
     """Display data as a rich table."""
+    if not data:
+        console.print("[yellow]No data to display[/yellow]")
+        return
+    
+    # Handle dict with sample data
+    if isinstance(data, dict):
+        if 'sample' in data:
+            data = data['sample']
+        elif 'rows' in data and 'columns' in data:
+            # Create sample data from schema
+            console.print(f"[dim]Data shape: {data['rows']} rows × {len(data['columns'])} columns[/dim]")
+            console.print(f"[dim]Columns: {', '.join(data['columns'])}[/dim]")
+            return
+    
     if not data or len(data) == 0:
         console.print("[yellow]No data to display[/yellow]")
         return
@@ -278,12 +285,17 @@ def display_table(data):
     table = Table(show_header=True, header_style="bold magenta")
     
     # Add columns
-    columns = list(data[0].keys()) if isinstance(data, list) else data.columns.tolist()
+    if isinstance(data, list) and len(data) > 0:
+        columns = list(data[0].keys())
+    else:
+        console.print("[yellow]Unsupported data format[/yellow]")
+        return
+    
     for col in columns:
         table.add_column(col)
     
     # Add rows (limit to 20 for display)
-    rows = data[:20] if isinstance(data, list) else data.head(20).to_dict('records')
+    rows = data[:20] if isinstance(data, list) else data
     for row in rows:
         table.add_row(*[str(row.get(col, '')) for col in columns])
     
@@ -306,7 +318,7 @@ def interactive():
     console.print("[bold cyan]DataAgent Interactive Mode[/bold cyan]")
     console.print("[dim]Type 'help' for commands, 'exit' to quit[/dim]\n")
     
-    agent = DataAgent().with_oauth_token(tokens['access_token'])
+    agent = DataAgent.with_existing_token(tokens['access_token'])
     context = {'agent': agent, 'source': None}
     
     while True:
@@ -332,12 +344,9 @@ def interactive():
                     try:
                         agent_query = agent
                         if context['source']:
-                            if context['source'].endswith('.csv'):
-                                agent_query = agent_query.from_csv(context['source'])
-                            elif context['source'].startswith(('postgresql://', 'mysql://')):
-                                agent_query = agent_query.connect_sql(context['source'])
+                            agent_query = agent_query.connect(context['source'])
                         
-                        result = agent_query.query(command).analyze()
+                        result = agent_query.explain(command).execute()
                         
                         if hasattr(result, 'data'):
                             display_table(result.data)
