@@ -430,18 +430,91 @@ class DataAgent:
                 error_message=str(e),
             )
     
-    def _get_schema_fingerprint(self, data_source: str) -> Optional[str]:
+    def _get_schema_fingerprint(self, data_source: Any) -> Optional[str]:
         """Get schema fingerprint for data source.
-        
+
         Args:
-            data_source: Data source identifier
-        
+            data_source: Data source identifier (can be dict, string, or DataSource object)
+
         Returns:
             Schema fingerprint or None if unable to determine
         """
-        # TODO: Implement schema discovery
-        # For now, return None (no recipe reuse)
-        return None
+        try:
+            # Handle dict-based data sources with explicit schema_fingerprint
+            if isinstance(data_source, dict):
+                if 'schema_fingerprint' in data_source:
+                    return data_source['schema_fingerprint']
+
+                # Try to extract from connection details
+                if 'type' in data_source and data_source['type'] == 'sql':
+                    # For SQL sources, compute fingerprint from connection
+                    connection_string = data_source.get('connection_string', '')
+                    if connection_string:
+                        # Try to query schema information
+                        return self._compute_sql_schema_fingerprint(connection_string)
+
+            # Handle object-based data sources
+            if hasattr(data_source, 'schema_fingerprint'):
+                return data_source.schema_fingerprint
+
+            # If we have a DataFrame reference, compute fingerprint
+            if hasattr(data_source, 'dataframe'):
+                df = data_source.dataframe
+                return self.schema_fingerprinter.compute_fingerprint_from_dataframe(df)
+
+            # Unable to determine schema
+            return None
+
+        except Exception as e:
+            # Log error but don't fail - just disable recipe reuse
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.debug(f"Could not compute schema fingerprint: {e}")
+            return None
+
+    def _compute_sql_schema_fingerprint(self, connection_string: str) -> Optional[str]:
+        """Compute schema fingerprint from SQL connection.
+
+        Args:
+            connection_string: Database connection string
+
+        Returns:
+            Schema fingerprint or None if unable to compute
+        """
+        try:
+            # Import DB connection utilities
+            from lib.agents.data_agent.db.connection import DatabaseConnection
+
+            # Create temporary connection
+            db_conn = DatabaseConnection(connection_string)
+            conn = db_conn.connect()
+
+            # Get table schema (assumes main table or first table)
+            cursor = conn.cursor()
+
+            # Try to get schema from information_schema (works for PostgreSQL, MySQL)
+            try:
+                cursor.execute("""
+                    SELECT column_name, data_type
+                    FROM information_schema.columns
+                    WHERE table_schema = current_schema()
+                    LIMIT 100
+                """)
+                columns = {row[0]: row[1] for row in cursor.fetchall()}
+                if columns:
+                    return self.schema_fingerprinter.compute_fingerprint(columns)
+            except Exception:
+                pass
+
+            # Fallback: return None to disable recipe reuse for this source
+            return None
+
+        except Exception as e:
+            # Log error but don't fail
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.debug(f"Could not compute SQL schema fingerprint: {e}")
+            return None
     
     def _create_artifact(
         self,
