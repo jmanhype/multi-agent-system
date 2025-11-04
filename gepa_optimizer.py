@@ -19,8 +19,9 @@ from dspy.teleprompt.gepa.gepa_utils import ScoreWithFeedback
 import multiprocessing
 multiprocessing.set_start_method('fork', force=True)
 
-# Add project root to path
-sys.path.insert(0, '/Users/speed/Downloads/multi-agent-system')
+# Add project root to path (using dynamic path resolution)
+project_root = Path(__file__).parent.absolute()
+sys.path.insert(0, str(project_root))
 from lib.data.dex_adapter import dex_adapter
 from lib.research.backtest_wrapper import run_backtest
 

@@ -111,7 +111,7 @@ class GEPASpecificationMetric:
         # Parse strategy
         try:
             strategy = json.loads(prediction.strategy)
-        except:
+        except (json.JSONDecodeError, TypeError, AttributeError) as e:
             strategy = prediction.strategy if isinstance(prediction.strategy, dict) else {}
         
         # 2. PARAMETER VALIDATION (Precise ranges, not "reasonable")
@@ -276,8 +276,8 @@ class GEPASpecificationMetric:
                 if strategy_type == "momentum" and entry_rsi > exit_rsi:
                     issues.append("Contradictory RSI levels")
                     score -= 0.2
-            except:
-                pass
+            except (KeyError, TypeError, AttributeError):
+                pass  # Skip coherence check if data structure is unexpected
         
         if issues:
             return (max(0, score), f"Coherence issues: {'; '.join(issues)}")
