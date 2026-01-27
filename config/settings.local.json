@@ -1,17 +1,17 @@
 {
   "trading": {
     "mode": "paper",
-    "exchange": "coinbase",
-    "symbol": "BTC/USD",
-    "position_size_usd": 62.5,
+    "exchange": "binance",
+    "symbol": "BTC/USDC",
+    "position_size_usd": 100,
     "stop_loss_pct": 0.02,
     "take_profit_pct": 0.04,
-    "max_positions": 3
+    "max_positions": 1
   },
   "risk": {
-    "max_daily_loss_usd": 100,
-    "max_drawdown_percent": 20,
-    "max_consecutive_losses": 5,
+    "max_daily_loss_usd": 50,
+    "max_drawdown_percent": 10,
+    "max_consecutive_losses": 3,
     "position_sizing_method": "fixed_usd",
     "leverage": 1
   },
@@ -26,6 +26,10 @@
     "slippage_tolerance": 0.001,
     "retry_attempts": 3,
     "retry_delay_seconds": 1
+  },
+  "ollama": {
+    "model": "llama3.1:8b",
+    "host": "http://localhost:11434"
   },
   "monitoring": {
     "health_check_interval": 60,

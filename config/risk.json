@@ -5,7 +5,7 @@
   "max_consecutive_losses": 3,
   "per_trade_risk_percent": 2.0,
   "max_leverage": 3.0,
-  "symbol_whitelist": ["BTC/USDT", "ETH/USDT"],
+  "symbol_whitelist": ["BTC/USDC", "ETH/USDC", "BTC/EUR", "ETH/EUR"],
   "correlation_settings": {
     "max_correlation": 0.7,
     "correlation_window_days": 30,
