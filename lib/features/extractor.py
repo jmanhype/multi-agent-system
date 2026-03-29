@@ -436,7 +436,8 @@ class FeatureExtractor:
             age = datetime.now(timezone.utc) - timestamp
             if age.total_seconds() > 300:
                 return False
-        except:
+        except (KeyError, ValueError, TypeError) as e:
+            # Invalid timestamp format or missing data
             return False
         
         # Validate data quality

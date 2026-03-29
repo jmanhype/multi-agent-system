@@ -212,7 +212,8 @@ def run_backtest(df: pd.DataFrame, exec_cfg: dict | None = None,
     # Get comprehensive stats - handle different VectorBT versions
     try:
         stats = pf.stats()
-    except:
+    except (AttributeError, TypeError, ValueError) as e:
+        logger.debug(f"Could not extract portfolio stats: {e}")
         stats = {}
     
     # Build result dictionary - handle callable vs property differences
@@ -223,7 +224,7 @@ def run_backtest(df: pd.DataFrame, exec_cfg: dict | None = None,
                 return float(obj())
             else:
                 return float(obj)
-        except:
+        except (TypeError, ValueError, AttributeError) as e:
             return default
     
     result = {
@@ -250,7 +251,7 @@ def run_backtest(df: pd.DataFrame, exec_cfg: dict | None = None,
         
         try:
             equity_curve = pf.cumulative_returns().to_dict() if hasattr(pf, 'cumulative_returns') else {}
-        except:
+        except (AttributeError, TypeError, ValueError) as e:
             equity_curve = {}
             
         # Trade-based metrics
@@ -266,8 +267,8 @@ def run_backtest(df: pd.DataFrame, exec_cfg: dict | None = None,
                 worst_trade = float(returns_series.min())
                 consecutive_wins = _max_consecutive(returns_series > 0)
                 consecutive_losses = _max_consecutive(returns_series < 0)
-        except:
-            pass
+        except (AttributeError, TypeError, ValueError) as e:
+            pass  # Use default values if trade analysis fails
         
         result.update({
             "calmar_ratio": calmar_ratio,
@@ -308,7 +309,7 @@ def _calculate_kelly(pf):
                     return float(obj())
                 else:
                     return float(obj)
-            except:
+            except (TypeError, ValueError, AttributeError):
                 return default
         
         win_rate = safe_extract(pf.trades.win_rate if hasattr(pf.trades, 'win_rate') else 0)
@@ -323,7 +324,7 @@ def _calculate_kelly(pf):
         if avg_loss == 0 or avg_win == 0:
             return 0.0
         return (win_rate * avg_win - (1 - win_rate) * avg_loss) / avg_win
-    except:
+    except (ZeroDivisionError, ValueError, TypeError) as e:
         return 0.0
 
 def analyze_trades(trades: List[Dict]) -> Dict:
@@ -426,7 +427,7 @@ def run_grid_search(data: Dict[str, pd.DataFrame], param_grid: Dict,
                 try:
                     val = func[col] if hasattr(func, '__getitem__') else func
                     return float(val) if not pd.isna(val) else default
-                except:
+                except (KeyError, TypeError, ValueError, AttributeError):
                     return default
             
             result = {
